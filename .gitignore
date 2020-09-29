@@ -1,0 +1,11 @@
+# Configuration
+config/
+
+# IntelliJ
+.idea/
+*.iml
+
+# Gradle
+.gradle/
+build/
+gradle.properties
