@@ -3,6 +3,7 @@ package me.moeszyslak.macaroni
 import com.gitlab.kordlib.kordx.emoji.Emojis
 import me.jakejmattson.discordkt.api.dsl.bot
 import me.jakejmattson.discordkt.api.extensions.*
+import me.moeszyslak.macaroni.data.Configuration
 import java.awt.Color
 
 suspend fun main(args: Array<String>) {
@@ -11,7 +12,8 @@ suspend fun main(args: Array<String>) {
 
     bot(token) {
         prefix {
-            "+"
+            val configuration = discord.getInjectionObjects(Configuration::class)
+            guild?.let { configuration[it.id.longValue]?.prefix } ?: "<none>"
         }
 
         configure {

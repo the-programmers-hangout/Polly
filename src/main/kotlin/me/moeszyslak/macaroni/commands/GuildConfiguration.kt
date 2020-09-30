@@ -1,15 +1,23 @@
 package me.moeszyslak.macaroni.commands
 
-import com.gitlab.kordlib.kordx.emoji.Emojis
 import me.jakejmattson.discordkt.api.dsl.commands
-import java.awt.Color
+import me.jakejmattson.discordkt.api.services.ConversationService
+import me.moeszyslak.macaroni.conversations.ConfigurationConversation
+import me.moeszyslak.macaroni.data.Configuration
+import me.moeszyslak.macaroni.extensions.requiredPermissionLevel
+import me.moeszyslak.macaroni.services.Permission
 
-fun basics() = commands("Basics") {
+fun guildConfigurationCommands(configuration: Configuration, conversationService: ConversationService) = commands("Basics") {
 
-    command("ping") {
-        description = "test"
+    command("Setup") {
+        description = "Setup a guild to use Macaroni"
+        requiredPermissionLevel = Permission.GUILD_OWNER
         execute {
-            respond("pong")
+            if (configuration.hasGuildConfig(guild!!.id.longValue))
+                return@execute respond("Guild configuration already exists. You can use commands to modify the config")
+
+            conversationService.startPublicConversation<ConfigurationConversation>(author, channel.asChannel(), guild!!)
+            respond("${guild!!.name} has been setup")
         }
     }
 }

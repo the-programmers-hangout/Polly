@@ -6,9 +6,9 @@
 | (Argument)  | Argument is not required.      |
 
 ## Basics
-| Commands | Arguments | Description |
-| -------- | --------- | ----------- |
-| ping     |           | test        |
+| Commands | Arguments | Description                   |
+| -------- | --------- | ----------------------------- |
+| Setup    |           | Setup a guild to use Macaroni |
 
 ## Utility
 | Commands | Arguments | Description          |
