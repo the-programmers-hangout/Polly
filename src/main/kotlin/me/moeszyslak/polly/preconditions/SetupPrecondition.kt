@@ -3,20 +3,15 @@ package me.moeszyslak.polly.preconditions
 import me.jakejmattson.discordkt.api.dsl.*
 import me.moeszyslak.polly.data.Configuration
 
+fun setupPrecondition(configuration: Configuration) = precondition {
+    val command: Command = command ?: return@precondition fail()
+    val guild = guild ?: return@precondition fail()
 
-class SetupPrecondition(private val configuration: Configuration) : Precondition() {
-    override suspend fun evaluate(event: CommandEvent<*>): PreconditionResult {
-        val command = event.command ?: return Fail()
-        val guild = event.guild!!
+    if (!author.asMember(guild.id).isOwner())
+        fail()
 
-        if (!event.author.asMember(event.guild!!.id).isOwner())
-            return Fail()
-
-        if (!command.names.contains("Setup")) {
-            if (!configuration.hasGuildConfig(guild.id.longValue))
-                return Fail("You must first use the `Setup` command in this guild.")
-        }
-
-        return Pass
+    if (!command.names.contains("Setup")) {
+        if (!configuration.hasGuildConfig(guild.id.longValue))
+            fail("You must first use the `Setup` command in this guild.")
     }
 }

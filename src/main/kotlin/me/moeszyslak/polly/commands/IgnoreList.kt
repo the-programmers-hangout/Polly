@@ -17,17 +17,17 @@ fun ignoreListCommands(configuration: Configuration) = commands("IgnoreList") {
         execute(
                 ChoiceArg("add/remove/list", "add", "remove", "list")
                         .makeOptional("list"),
-                UserArg.makeNullableOptional(null)) {
+                UserArg) {
 
             val (choice, user) = args
             val config = configuration[guild!!.id.longValue] ?: return@execute
 
             when (choice) {
                 "add" -> {
-                    user ?: return@execute respond("Received less arguments than expected. Expected: `(User)`")
-
-                    if (config.ignoredUsers.contains(user.id.longValue))
-                        return@execute respond("${user.username} is already being ignored")
+                    if (config.ignoredUsers.contains(user.id.longValue)) {
+                        respond("${user.username} is already being ignored")
+                        return@execute
+                    }
 
                     config.ignoredUsers.add(user.id.longValue)
                     configuration.save()
@@ -36,10 +36,10 @@ fun ignoreListCommands(configuration: Configuration) = commands("IgnoreList") {
                 }
 
                 "remove" -> {
-                    user ?: return@execute respond("Received less arguments than expected. Expected: `(User)`")
-
-                    if (!config.ignoredUsers.contains(user.id.longValue))
-                        return@execute respond("${user.username} is not being ignored")
+                    if (!config.ignoredUsers.contains(user.id.longValue)) {
+                        respond("${user.username} is not being ignored")
+                        return@execute
+                    }
 
                     config.ignoredUsers.remove(user.id.longValue)
                     configuration.save()

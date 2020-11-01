@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    implementation("me.jakejmattson:DiscordKt:0.20.0")
+    implementation("me.jakejmattson:DiscordKt:0.21.1")
 }
 
 tasks.withType<KotlinCompile> {

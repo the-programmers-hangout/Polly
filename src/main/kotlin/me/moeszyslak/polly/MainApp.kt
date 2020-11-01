@@ -21,13 +21,13 @@ suspend fun main(args: Array<String>) {
             allowMentionPrefix = true
             generateCommandDocs = true
             showStartupLog = true
-            requiresGuild = true
+//            requiresGuild = true
             commandReaction = Emojis.eyes
             theme = Color(0x00BFFF)
         }
 
         mentionEmbed {
-            title = "Hello World"
+            title = "Polly - Macro Bot"
             color = it.discord.configuration.theme
 
             author {
