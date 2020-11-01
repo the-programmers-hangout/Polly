@@ -5,17 +5,12 @@ import me.moeszyslak.polly.extensions.requiredPermissionLevel
 import me.moeszyslak.polly.services.PermissionsService
 
 
-class PermissionPrecondition(private val permissionsService: PermissionsService) : Precondition() {
-    override suspend fun evaluate(event: CommandEvent<*>): PreconditionResult {
-        val command = event.command ?: return Fail()
-        val requiredPermissionLevel = command.requiredPermissionLevel
-        val guild = event.guild!!
-        val member = event.author.asMember(guild.id)
+fun permissionPrecondition(permissionsService: PermissionsService) = precondition {
+    val command = command ?: return@precondition fail()
+    val requiredPermissionLevel = command.requiredPermissionLevel
+    val guild = guild ?: return@precondition fail()
+    val member = author.asMember(guild.id)
 
-
-        if (!permissionsService.hasClearance(member, requiredPermissionLevel))
-            return Fail()
-
-        return Pass
-    }
+    if (!permissionsService.hasClearance(member, requiredPermissionLevel))
+        fail()
 }

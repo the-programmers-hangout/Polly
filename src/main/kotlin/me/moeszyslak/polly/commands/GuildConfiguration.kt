@@ -4,32 +4,33 @@ import me.jakejmattson.discordkt.api.arguments.AnyArg
 import me.jakejmattson.discordkt.api.arguments.ChannelArg
 import me.jakejmattson.discordkt.api.arguments.RoleArg
 import me.jakejmattson.discordkt.api.dsl.commands
-import me.jakejmattson.discordkt.api.services.ConversationService
-import me.moeszyslak.polly.conversations.ConfigurationConversation
+import me.moeszyslak.polly.conversations.configurationConversation
 import me.moeszyslak.polly.data.Configuration
 import me.moeszyslak.polly.extensions.requiredPermissionLevel
 import me.moeszyslak.polly.services.Permission
 
-fun guildConfigurationCommands(configuration: Configuration, conversationService: ConversationService) = commands("Basics") {
+fun guildConfigurationCommands(configuration: Configuration) = commands("Basics") {
 
-    command("Setup") {
+    guildCommand("Setup") {
         description = "Setup a guild to use Macaroni"
         requiredPermissionLevel = Permission.GUILD_OWNER
         execute {
-            if (configuration.hasGuildConfig(guild!!.id.longValue))
-                return@execute respond("Guild configuration already exists. You can use commands to modify the config")
+            if (configuration.hasGuildConfig(guild.id.longValue)) {
+                respond("Guild configuration already exists. You can use commands to modify the config")
+                return@execute
+            }
 
-            conversationService.startPublicConversation<ConfigurationConversation>(author, channel.asChannel(), guild!!)
-            respond("${guild!!.name} has been setup")
+            configurationConversation(guild.id.longValue, configuration).startPrivately(discord, author)
+            respond("${guild.name} has been setup")
         }
     }
 
-    command("Prefix") {
+    guildCommand("Prefix") {
         description = "Set the prefix required for the bot to register a command."
         requiredPermissionLevel = Permission.STAFF
         execute(AnyArg("Prefix")) {
             val prefix = args.first
-            val config = configuration[guild!!.id.longValue] ?: return@execute
+            val config = configuration[guild.id.longValue] ?: return@execute
 
             config.prefix = prefix
             configuration.save()
@@ -38,12 +39,12 @@ fun guildConfigurationCommands(configuration: Configuration, conversationService
         }
     }
 
-    command("StaffRole") {
+    guildCommand("StaffRole") {
         description = "Set the role required to use this bot."
         requiredPermissionLevel = Permission.STAFF
         execute(RoleArg) {
             val requiredRole = args.first
-            val config = configuration[(guild!!.id.longValue)] ?: return@execute
+            val config = configuration[(guild.id.longValue)] ?: return@execute
 
             config.staffRole = requiredRole.id.longValue
             configuration.save()
@@ -52,12 +53,12 @@ fun guildConfigurationCommands(configuration: Configuration, conversationService
         }
     }
 
-    command("LogChannel") {
+    guildCommand("LogChannel") {
         description = "Set the channel where logs will be output."
         requiredPermissionLevel = Permission.STAFF
         execute(ChannelArg) {
             val logChannel = args.first
-            val config = configuration[(guild!!.id.longValue)] ?: return@execute
+            val config = configuration[(guild.id.longValue)] ?: return@execute
 
             config.staffRole = logChannel.id.longValue
             configuration.save()
