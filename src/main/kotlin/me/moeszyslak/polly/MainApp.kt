@@ -1,9 +1,10 @@
-package me.moeszyslak.macaroni
+package me.moeszyslak.polly
 
 import com.gitlab.kordlib.kordx.emoji.Emojis
 import me.jakejmattson.discordkt.api.dsl.bot
-import me.jakejmattson.discordkt.api.extensions.*
-import me.moeszyslak.macaroni.data.Configuration
+import me.jakejmattson.discordkt.api.extensions.addField
+import me.jakejmattson.discordkt.api.extensions.profileLink
+import me.moeszyslak.polly.data.Configuration
 import java.awt.Color
 
 suspend fun main(args: Array<String>) {

@@ -1,8 +1,8 @@
-package me.moeszyslak.macaroni.extensions
+package me.moeszyslak.polly.extensions
 
 import me.jakejmattson.discordkt.api.dsl.Command
-import me.moeszyslak.macaroni.services.DEFAULT_REQUIRED_PERMISSION
-import me.moeszyslak.macaroni.services.Permission
+import me.moeszyslak.polly.services.DEFAULT_REQUIRED_PERMISSION
+import me.moeszyslak.polly.services.Permission
 import java.util.*
 
 

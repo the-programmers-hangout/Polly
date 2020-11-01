@@ -1,7 +1,7 @@
-package me.moeszyslak.macaroni.preconditions
+package me.moeszyslak.polly.preconditions
 
 import me.jakejmattson.discordkt.api.dsl.*
-import me.moeszyslak.macaroni.data.Configuration
+import me.moeszyslak.polly.data.Configuration
 
 
 class SetupPrecondition(private val configuration: Configuration) : Precondition() {

@@ -1,8 +1,8 @@
-package me.moeszyslak.macaroni.preconditions
+package me.moeszyslak.polly.preconditions
 
 import me.jakejmattson.discordkt.api.dsl.*
-import me.moeszyslak.macaroni.extensions.requiredPermissionLevel
-import me.moeszyslak.macaroni.services.PermissionsService
+import me.moeszyslak.polly.extensions.requiredPermissionLevel
+import me.moeszyslak.polly.services.PermissionsService
 
 
 class PermissionPrecondition(private val permissionsService: PermissionsService) : Precondition() {

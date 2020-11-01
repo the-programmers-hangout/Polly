@@ -1,4 +1,4 @@
-package me.moeszyslak.macaroni.data
+package me.moeszyslak.polly.data
 
 import com.gitlab.kordlib.core.entity.Guild
 import com.gitlab.kordlib.core.entity.Role
@@ -12,13 +12,12 @@ data class Configuration(
     operator fun get(id: Long) = guildConfigurations[id]
     fun hasGuildConfig(guildId: Long) = guildConfigurations.containsKey(guildId)
 
-    fun setup(guild: Guild, logChannel: Channel, prefix: String, macroPrefix: String, staffRole: Role) {
+    fun setup(guild: Guild, logChannel: Channel, prefix: String, staffRole: Role) {
         if (guildConfigurations[guild.id.longValue] != null) return
 
         val newConfiguration = GuildConfiguration(
                 logChannel.id.longValue,
                 prefix,
-                macroPrefix,
                 staffRole.id.longValue,
                 mutableMapOf(),
                 mutableSetOf()
@@ -32,10 +31,9 @@ data class Configuration(
 data class GuildConfiguration(
         var logChannel: Long,
         var prefix: String,
-        var macroPrefix: String,
         var staffRole: Long,
         var macros: MutableMap<String, Macro>,
         var ignoredUsers: MutableSet<Long>
 )
 
-data class Macro(val name: String = "", var contents: String = "", val channel: Long, var category: String)
+data class Macro(val name: String = "", var contents: String = "", val channel: Long?, var category: String)

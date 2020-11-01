@@ -1,9 +1,9 @@
-package me.moeszyslak.macaroni.services
+package me.moeszyslak.polly.services
 
 import com.gitlab.kordlib.core.entity.Member
 import kotlinx.coroutines.flow.toList
 import me.jakejmattson.discordkt.api.annotations.Service
-import me.moeszyslak.macaroni.data.Configuration
+import me.moeszyslak.polly.data.Configuration
 
 enum class Permission {
     BOT_OWNER,
