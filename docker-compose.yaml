@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  polly:
+    container_name: Polly
+    image: theprogrammershangout/polly:latest
+    volumes:
+      - type: bind
+        source: ./config
+        target: /config
+    restart: always
+    env_file:
+      - .env

@@ -1,10 +1,11 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "me.moeszyslak"
-version = "0.20.0"
+version = Versions.BOT
 
 plugins {
     kotlin("jvm") version "1.4.10"
+    id("com.github.johnrengelman.shadow") version "6.0.0"
 }
 
 repositories {
@@ -13,9 +14,25 @@ repositories {
 }
 
 dependencies {
-    implementation("me.jakejmattson:DiscordKt:0.21.2")
+    implementation("me.jakejmattson:DiscordKt:${Versions.DISCORDKT}")
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+tasks {
+    withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = "1.8"
+    }
+
+    shadowJar {
+        archiveFileName.set("Polly.jar")
+        manifest {
+            attributes(
+                    "Main-Class" to "me.moeszyslak.polly.MainAppKt"
+            )
+        }
+    }
+}
+
+object Versions {
+    const val BOT = "0.0.1"
+    const val DISCORDKT = "0.21.2"
 }
