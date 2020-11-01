@@ -13,10 +13,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
     guildCommand("add") {
         description = "Adds a macro to a specific channel or globally, if no channel is given"
         requiredPermissionLevel = Permission.STAFF
-//        usageExamples = listOf(
-//                "coolname Miscellaneous This is a global macro",
-//                "promises Programming #javascript Channel specific macro"
-//        )
+
         execute(AnyArg("Name"),
                 AnyArg("Category"),
                 ChannelArg<TextChannel>("Channel").makeNullableOptional(),

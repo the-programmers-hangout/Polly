@@ -2,18 +2,15 @@ package me.moeszyslak.polly.services
 
 import com.gitlab.kordlib.core.behavior.channel.MessageChannelBehavior
 import com.gitlab.kordlib.core.entity.Guild
-import com.gitlab.kordlib.core.entity.channel.MessageChannel
 import com.gitlab.kordlib.core.entity.channel.TextChannel
 import com.gitlab.kordlib.core.event.message.MessageCreateEvent
+import kotlinx.coroutines.runBlocking
 import me.jakejmattson.discordkt.api.Discord
 import me.jakejmattson.discordkt.api.annotations.Service
-import me.jakejmattson.discordkt.api.dsl.BotConfiguration
 import me.jakejmattson.discordkt.api.dsl.CommandEvent
 import me.jakejmattson.discordkt.api.dsl.listeners
-import me.jakejmattson.discordkt.api.dsl.precondition
 import me.jakejmattson.discordkt.api.extensions.toSnowflakeOrNull
 import me.moeszyslak.polly.data.Configuration
-import me.moeszyslak.polly.data.GuildConfiguration
 import me.moeszyslak.polly.data.Macro
 import me.moeszyslak.polly.data.MacroStore
 
@@ -175,12 +172,15 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
 
 fun macroListener(macroService: MacroService, configuration: Configuration) = listeners {
     on<MessageCreateEvent> {
-        val guild = getGuild() ?: return@on
+        val guild = runBlocking {
+            getGuild()
+        } ?: return@on
+
         val prefix = configuration[guild.id.longValue]?.prefix
+
         if (prefix.isNullOrEmpty()) {
             return@on
         }
-
 
         if (!message.content.startsWith(prefix)) {
             return@on
@@ -193,11 +193,15 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
                 ?.firstOrNull()
                 ?: return@on
 
+
         val macro = macroService.findMacro(guild, macroName, message.channel)
 
         if (macro != null) {
+            runBlocking {
+                message.channel.createMessage(macro.contents)
+            }
 //            message.delete()
-            message.channel.createMessage(macro.contents)
+
         }
     }
 }
