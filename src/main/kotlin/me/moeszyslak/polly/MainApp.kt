@@ -1,12 +1,15 @@
 package me.moeszyslak.polly
 
+import com.gitlab.kordlib.gateway.Intent
 import com.gitlab.kordlib.kordx.emoji.Emojis
 import me.jakejmattson.discordkt.api.dsl.bot
-import me.jakejmattson.discordkt.api.extensions.addField
-import me.jakejmattson.discordkt.api.extensions.profileLink
+import me.jakejmattson.discordkt.api.extensions.toSnowflake
 import me.moeszyslak.polly.data.Configuration
+import me.moeszyslak.polly.services.StatisticsService
 import java.awt.Color
+import kotlin.time.ExperimentalTime
 
+@ExperimentalTime
 suspend fun main(args: Array<String>) {
     val token = args.firstOrNull()
     require(token != null) { "Expected the bot token as a command line argument!" }
@@ -21,33 +24,76 @@ suspend fun main(args: Array<String>) {
             allowMentionPrefix = true
             generateCommandDocs = true
             showStartupLog = true
-//            requiresGuild = true
             commandReaction = Emojis.eyes
             theme = Color(0x00BFFF)
         }
 
         mentionEmbed {
-            title = "Polly - Macro Bot"
+            title = "Polly"
+            description = "A simple, elegant macro bot"
             color = it.discord.configuration.theme
 
-            author {
-                with(it.author) {
-                    icon = avatar.url
-                    name = tag
-                    url = profileLink
+            thumbnail {
+                url = it.discord.api.getSelf().avatar.url
+            }
+
+            field {
+                name = "Prefix"
+                value = it.prefix()
+                inline = true
+            }
+
+            val statsService = it.discord.getInjectionObjects(StatisticsService::class)
+            field {
+                name = "Ping"
+                value = statsService.ping
+                inline = true
+            }
+
+            val configuration = it.discord.getInjectionObjects(Configuration::class)
+            val guildConfiguration = configuration[it.guild!!.id.longValue]
+
+            if (guildConfiguration != null) {
+                val staffRole = it.guild!!.getRole(guildConfiguration.staffRole.toSnowflake())
+                val loggingChannel = it.guild!!.getChannel(guildConfiguration.logChannel.toSnowflake())
+
+                field {
+
+                    name = "Configuration"
+                    value = "```" +
+                            "Staff Role: ${staffRole.name}\n" +
+                            "Logging Channel: ${loggingChannel.name}\n" +
+                            "```"
                 }
             }
 
-            thumbnail {
-                url = api.getSelf().avatar.url
-            }
-
-            footer {
+            field {
                 val versions = it.discord.versions
-                text = "${versions.library} - ${versions.kord} - ${versions.kotlin}"
+
+                name = "Bot Info"
+                value = "```" +
+                        "Version: 1.0.0\n" +
+                        "DiscordKt: ${versions.library}\n" +
+                        "Kord: ${versions.kord}\n" +
+                        "Kotlin: ${versions.kotlin}" +
+                        "```"
             }
 
-            addField("Prefix", it.prefix())
+            field {
+                name = "Uptime"
+                value = statsService.uptime
+                inline = true
+            }
+
+            field {
+                name = "Source"
+                value = "[GitHub](https://github.com/the-programmers-hangout/Polly)"
+                inline = true
+            }
+        }
+
+        intents {
+            +Intent.GuildMessages
         }
 
         permissions {
