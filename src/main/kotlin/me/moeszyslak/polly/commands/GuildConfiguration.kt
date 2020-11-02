@@ -12,7 +12,7 @@ import me.moeszyslak.polly.services.Permission
 fun guildConfigurationCommands(configuration: Configuration) = commands("Basics") {
 
     guildCommand("Setup") {
-        description = "Setup a guild to use Macaroni"
+        description = "Setup a guild to use Polly"
         requiredPermissionLevel = Permission.GUILD_OWNER
         execute {
             if (configuration.hasGuildConfig(guild.id.longValue)) {
@@ -20,7 +20,7 @@ fun guildConfigurationCommands(configuration: Configuration) = commands("Basics"
                 return@execute
             }
 
-            configurationConversation(guild.id.longValue, configuration).startPrivately(discord, author)
+            configurationConversation(guild.id.longValue, configuration).startPublicly(discord, author, channel)
             respond("${guild.name} has been setup")
         }
     }

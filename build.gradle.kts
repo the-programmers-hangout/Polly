@@ -34,5 +34,5 @@ tasks {
 
 object Versions {
     const val BOT = "0.0.1"
-    const val DISCORDKT = "0.21.2"
+    const val DISCORDKT = "0.21.3"
 }

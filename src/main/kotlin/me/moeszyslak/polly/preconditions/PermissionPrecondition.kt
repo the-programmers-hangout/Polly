@@ -12,5 +12,5 @@ fun permissionPrecondition(permissionsService: PermissionsService) = preconditio
     val member = author.asMember(guild.id)
 
     if (!permissionsService.hasClearance(member, requiredPermissionLevel))
-        fail()
+        fail("I'm afraid I can't let you do that.")
 }

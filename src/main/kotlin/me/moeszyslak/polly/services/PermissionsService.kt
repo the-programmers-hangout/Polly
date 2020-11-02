@@ -10,14 +10,16 @@ enum class Permission {
     GUILD_OWNER,
     STAFF,
     USER,
-    NONE
+    EVERYONE
 }
 
-val DEFAULT_REQUIRED_PERMISSION = Permission.STAFF
+val DEFAULT_REQUIRED_PERMISSION = Permission.EVERYONE
 
 @Service
 class PermissionsService(private val configuration: Configuration) {
-    suspend fun hasClearance(member: Member, requiredPermissionLevel: Permission) = member.getPermissionLevel().ordinal <= requiredPermissionLevel.ordinal
+    suspend fun hasClearance(member: Member, requiredPermissionLevel: Permission): Boolean {
+        return member.getPermissionLevel().ordinal <= requiredPermissionLevel.ordinal
+    }
 
     private suspend fun Member.getPermissionLevel() =
             when {
@@ -25,7 +27,7 @@ class PermissionsService(private val configuration: Configuration) {
                 isGuildOwner() -> Permission.GUILD_OWNER
                 isStaff() -> Permission.STAFF
                 isUser() -> Permission.USER
-                else -> Permission.NONE
+                else -> Permission.EVERYONE
             }
 
     private fun Member.isBotOwner() = id.longValue == configuration.botOwner
@@ -34,11 +36,6 @@ class PermissionsService(private val configuration: Configuration) {
         val config = configuration[guildId.longValue] ?: return false
 
         return roles.toList().any { it.id.longValue == config.staffRole }
-    }
-    private fun Member.isIgnored(): Boolean {
-        val config = configuration[guildId.longValue] ?: return false
-
-        return config.ignoredUsers.contains(id.longValue)
     }
     private suspend fun Member.isUser() = asMemberOrNull() != null
 }

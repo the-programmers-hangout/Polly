@@ -6,8 +6,8 @@ import me.jakejmattson.discordkt.api.dsl.Data
 data class MacroStore(
         val macros: MutableMap<GuildId, MutableMap<String, Macro>> = mutableMapOf()): Data("config/macros.json", killIfGenerated = false) {
 
-    fun<R> forGuild(guild: Guild, fn: (MutableMap<String, Macro>) -> R): R {
-        val guildMacros = macros.getOrPut(guild.id.longValue) { mutableMapOf() }
+    fun<R> forGuild(guildId: GuildId, fn: (MutableMap<String, Macro>) -> R): R {
+        val guildMacros = macros.getOrPut(guildId) { mutableMapOf() }
         return fn(guildMacros).also { save() }
     }
 }

@@ -4,23 +4,32 @@ import com.gitlab.kordlib.core.behavior.channel.MessageChannelBehavior
 import com.gitlab.kordlib.core.entity.Guild
 import com.gitlab.kordlib.core.entity.channel.TextChannel
 import com.gitlab.kordlib.core.event.message.MessageCreateEvent
+import com.gitlab.kordlib.kordx.emoji.Emojis
+import com.gitlab.kordlib.kordx.emoji.toReaction
 import kotlinx.coroutines.runBlocking
 import me.jakejmattson.discordkt.api.Discord
 import me.jakejmattson.discordkt.api.annotations.Service
+import me.jakejmattson.discordkt.api.dsl.BotConfiguration
 import me.jakejmattson.discordkt.api.dsl.CommandEvent
+import me.jakejmattson.discordkt.api.dsl.SimpleConfiguration
 import me.jakejmattson.discordkt.api.dsl.listeners
 import me.jakejmattson.discordkt.api.extensions.toSnowflakeOrNull
+import me.moeszyslak.polly.commands.isIgnored
 import me.moeszyslak.polly.data.Configuration
+import me.moeszyslak.polly.data.GuildId
 import me.moeszyslak.polly.data.Macro
 import me.moeszyslak.polly.data.MacroStore
 
+
 @Service
 class MacroService(private val store: MacroStore, private val discord: Discord) {
-    fun addMacro(guild: Guild, name: String, category: String, channel: TextChannel?, contents: String): String {
+    fun addMacro(guild: GuildId, name_raw: String, category_raw: String, channel: TextChannel?, contents: String): String {
         val channelId = channel?.id?.value ?: ""
+        val name = name_raw.toLowerCase()
+        val category = category_raw.toLowerCase()
 
-        if (name in discord.commands.map { it.names }.flatten()) {
-            return "A command with that name already exists"
+        if (name in discord.commands.map { it.names }.flatten().map { it.toLowerCase() }) {
+            return "A command with that name already exists."
         }
 
         val result = store.forGuild(guild) {
@@ -34,22 +43,24 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    fun removeMacro(guild: Guild, name: String, channel: TextChannel?): String {
-        val channelId = channel?.id ?: ""
+    fun removeMacro(guild: GuildId, name_raw: String, channel: TextChannel?): String {
+        val channelId = channel?.id?.value ?: ""
+        val name = name_raw.toLowerCase()
 
         val result = store.forGuild(guild) {
             it.remove("$name#$channelId")
         }
 
-        return if (result == null) {
+        return if (result != null) {
             "Success. Macro `$name` has been removed"
         } else {
             "Cannot find a macro by that name. If it is a channel specific macro you need to provide the channel as well."
         }
     }
 
-    fun editMacro(guild: Guild, name: String, channel: TextChannel?, contents: String): String {
-        val channelId = channel?.id ?: ""
+    fun editMacro(guild: GuildId, name_raw: String, channel: TextChannel?, contents: String): String {
+        val channelId = channel?.id?.value ?: ""
+        val name = name_raw.toLowerCase()
 
         val result = store.forGuild(guild) {
             if (it.containsKey("$name#$channelId")) {
@@ -67,8 +78,10 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    fun editMacroCategory(guild: Guild, name: String, channel: TextChannel?, category: String): String {
-        val channelId = channel?.id ?: ""
+    fun editMacroCategory(guild: GuildId, name_raw: String, channel: TextChannel?, category_raw: String): String {
+        val channelId = channel?.id?.value ?: ""
+        val name = name_raw.toLowerCase()
+        val category = category_raw.toLowerCase()
 
         val result = store.forGuild(guild) {
             if (it.containsKey("$name#$channelId")) {
@@ -86,7 +99,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    suspend fun listMacros(event: CommandEvent<*>, guild: Guild, channel: TextChannel) = with(event) {
+    suspend fun listMacros(event: CommandEvent<*>, guild: GuildId, channel: TextChannel) = with(event) {
         val availableMacros = getMacrosAvailableIn(guild, channel)
                 .groupBy { it.category }
                 .toList()
@@ -117,7 +130,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
     }
 
     suspend fun listAllMacros(event: CommandEvent<*>, guild: Guild) {
-        val allMacros = store.forGuild(guild) { it }
+        val allMacros = store.forGuild(guild.id.longValue) { it }
                 .map { it.value }
                 .groupBy { it.channel?.toSnowflakeOrNull()?.let { guild.getChannel(it).name } ?: "Global Macros" }
                 .toList()
@@ -145,7 +158,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    private fun getMacrosAvailableIn(guild: Guild, channel: TextChannel): List<Macro> {
+    private fun getMacrosAvailableIn(guild: GuildId, channel: TextChannel): List<Macro> {
         val macroList = store.forGuild(guild) { macros ->
             macros.filter {
                 it.key.endsWith('#') || it.key.takeLast(18) == channel.id.value
@@ -161,22 +174,27 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }.map { it.value }
     }
 
-    fun findMacro(guild: Guild, name: String, channel: MessageChannelBehavior): Macro? {
+    fun findMacro(guild: GuildId, name_raw: String, channel: MessageChannelBehavior): Macro? {
+        val name = name_raw.toLowerCase()
+        val channelId = channel.id.value
+
         return store.forGuild(guild) {
             // first try to find a channel specific macro
             // if it fails, default to a global macro
-            it["$name#${channel.id}"] ?: it["$name#"]
+            it["$name#$channelId"] ?: it["$name#"]
         }
     }
 }
 
 fun macroListener(macroService: MacroService, configuration: Configuration) = listeners {
     on<MessageCreateEvent> {
-        val guild = runBlocking {
-            getGuild()
-        } ?: return@on
+        val guildId = guildId?.longValue ?: return@on
+        val member = member?: return@on
+        if (member.isIgnored(configuration)) {
+            return@on
+        }
 
-        val prefix = configuration[guild.id.longValue]?.prefix
+        val prefix = configuration[guildId]?.prefix
 
         if (prefix.isNullOrEmpty()) {
             return@on
@@ -189,19 +207,16 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
         val macroName = message.content
                 .split(prefix, limit = 2)
                 .getOrNull(1)
-                ?.split("\\s".toRegex(), limit = 1)
+                ?.split("\\s".toRegex(), limit = 2)
                 ?.firstOrNull()
                 ?: return@on
 
 
-        val macro = macroService.findMacro(guild, macroName, message.channel)
+        val macro = macroService.findMacro(guildId, macroName, message.channel)
 
         if (macro != null) {
-            runBlocking {
-                message.channel.createMessage(macro.contents)
-            }
-//            message.delete()
-
+            message.addReaction(Emojis.eyes.toReaction())
+            message.channel.createMessage(macro.contents)
         }
     }
 }

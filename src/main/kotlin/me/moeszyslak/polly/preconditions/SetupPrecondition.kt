@@ -4,11 +4,8 @@ import me.jakejmattson.discordkt.api.dsl.*
 import me.moeszyslak.polly.data.Configuration
 
 fun setupPrecondition(configuration: Configuration) = precondition {
-    val command: Command = command ?: return@precondition fail()
-    val guild = guild ?: return@precondition fail()
-
-    if (!author.asMember(guild.id).isOwner())
-        fail()
+    val guild = guild ?: return@precondition
+    val command: Command = command ?: return@precondition
 
     if (!command.names.contains("Setup")) {
         if (!configuration.hasGuildConfig(guild.id.longValue))
