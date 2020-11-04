@@ -6,12 +6,9 @@ import com.gitlab.kordlib.core.entity.channel.TextChannel
 import com.gitlab.kordlib.core.event.message.MessageCreateEvent
 import com.gitlab.kordlib.kordx.emoji.Emojis
 import com.gitlab.kordlib.kordx.emoji.toReaction
-import kotlinx.coroutines.runBlocking
 import me.jakejmattson.discordkt.api.Discord
 import me.jakejmattson.discordkt.api.annotations.Service
-import me.jakejmattson.discordkt.api.dsl.BotConfiguration
 import me.jakejmattson.discordkt.api.dsl.CommandEvent
-import me.jakejmattson.discordkt.api.dsl.SimpleConfiguration
 import me.jakejmattson.discordkt.api.dsl.listeners
 import me.jakejmattson.discordkt.api.extensions.toSnowflakeOrNull
 import me.moeszyslak.polly.commands.isIgnored
@@ -204,19 +201,19 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
             return@on
         }
 
-        val macroName = message.content
-                .split(prefix, limit = 2)
-                .getOrNull(1)
-                ?.split("\\s".toRegex(), limit = 2)
-                ?.firstOrNull()
-                ?: return@on
-
+        val macroName = message.content.replace(prefix, "")
 
         val macro = macroService.findMacro(guildId, macroName, message.channel)
 
         if (macro != null) {
-            message.addReaction(Emojis.eyes.toReaction())
+            if (message.content.startsWith("$prefix$prefix")) {
+                message.addReaction(Emojis.eyes.toReaction())
+            } else {
+                message.delete()
+            }
+
             message.channel.createMessage(macro.contents)
+
         }
     }
 }
