@@ -46,7 +46,7 @@ fun ignoreListCommands(configuration: Configuration) = commands("IgnoreList") {
         description = "Add/remove users from the ignore list."
         requiredPermissionLevel = Permission.STAFF
         execute(
-                ChoiceArg("add/remove/list", "add", "remove"),
+                ChoiceArg("add/remove", "add", "remove"),
                 UserArg) {
 
             val (choice, user) = args

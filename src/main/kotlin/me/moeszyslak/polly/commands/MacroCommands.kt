@@ -10,7 +10,7 @@ import me.moeszyslak.polly.services.MacroService
 import me.moeszyslak.polly.services.Permission
 
 fun macroCommands(macroService: MacroService) = commands("Macros") {
-    guildCommand("add") {
+    guildCommand("AddMacro") {
         description = "Adds a macro (for all channels)"
         requiredPermissionLevel = Permission.STAFF
 
@@ -23,7 +23,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    guildCommand("add-channel") {
+    guildCommand("AddChannelMacro") {
         description = "Adds a macro to a specific channel"
         requiredPermissionLevel = Permission.STAFF
 
@@ -37,7 +37,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    guildCommand("remove") {
+    guildCommand("RemoveMacro") {
         description = "Removes a macro"
         requiredPermissionLevel = Permission.STAFF
         execute(AnyArg("Name"), ChannelArg<TextChannel>("Channel").makeNullableOptional()) {
@@ -45,7 +45,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    guildCommand("edit") {
+    guildCommand("EditMacro") {
         description = "Edits the contents of a macro"
         requiredPermissionLevel = Permission.STAFF
         execute(AnyArg("Name"), ChannelArg<TextChannel>("Channel").makeNullableOptional(), EveryArg("Contents")) {
@@ -53,7 +53,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    guildCommand("editcategory") {
+    guildCommand("EditCategory") {
         description = "Edits the category of a macro"
         requiredPermissionLevel = Permission.STAFF
         execute(AnyArg("Name"), ChannelArg<TextChannel>("Channel").makeNullableOptional(), AnyArg("New Category")) {
@@ -61,7 +61,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    guildCommand("list") {
+    guildCommand("ListMacros") {
         description = "Lists all macros available in the given channel. If no channel is specified, defaults to the current channel."
         requiredPermissionLevel = Permission.USER
         execute(ChannelArg<TextChannel>("Channel").makeOptional { it.channel as TextChannel }) {
@@ -69,7 +69,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    guildCommand("listall") {
+    guildCommand("ListAllMacros") {
         description = "Lists all macros available in the guild.id.longValue, grouped by channel."
         requiredPermissionLevel = Permission.USER
         execute {
