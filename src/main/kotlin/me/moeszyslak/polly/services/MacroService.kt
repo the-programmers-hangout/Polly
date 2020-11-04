@@ -201,7 +201,11 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
             return@on
         }
 
-        val macroName = message.content.replace(prefix, "")
+        val macroName = message.content
+                .replace(prefix, "")
+                .split("\\s".toRegex(), limit = 2)
+                .firstOrNull()
+                ?: return@on
 
         val macro = macroService.findMacro(guildId, macroName, message.channel)
 
