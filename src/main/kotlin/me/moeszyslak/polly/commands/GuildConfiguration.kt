@@ -63,7 +63,7 @@ fun guildConfigurationCommands(configuration: Configuration) = commands("Basics"
             config.staffRole = logChannel.id.longValue
             configuration.save()
 
-            respond("Required role set to ${logChannel.name}")
+            respond("Log channel set to ${logChannel.name}")
         }
     }
 }
