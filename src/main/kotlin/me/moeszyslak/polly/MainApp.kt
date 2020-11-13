@@ -7,6 +7,8 @@ import com.gitlab.kordlib.kordx.emoji.Emojis
 import me.jakejmattson.discordkt.api.dsl.bot
 import me.jakejmattson.discordkt.api.extensions.toSnowflake
 import me.moeszyslak.polly.data.Configuration
+import me.moeszyslak.polly.extensions.requiredPermissionLevel
+import me.moeszyslak.polly.services.PermissionsService
 import me.moeszyslak.polly.services.StatisticsService
 import java.awt.Color
 import kotlin.time.ExperimentalTime
@@ -30,6 +32,7 @@ suspend fun main() {
             showStartupLog = true
             commandReaction = Emojis.eyes
             theme = Color(0x00BFFF)
+            recommendCommands = false
         }
 
         mentionEmbed {
@@ -105,7 +108,16 @@ suspend fun main() {
         }
 
         permissions {
-            true
+            val requiredPermissionLevel = command.requiredPermissionLevel
+            val guild = guild ?: return@permissions false
+            val member = user.asMember(guild.id)
+
+            val permissionsService = discord.getInjectionObjects(PermissionsService::class)
+
+            if (!permissionsService.hasClearance(member, requiredPermissionLevel))
+                return@permissions false
+
+            return@permissions true
         }
     }
 }
