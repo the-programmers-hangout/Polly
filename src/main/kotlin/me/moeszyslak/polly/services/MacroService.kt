@@ -118,7 +118,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
 
                             field {
                                 name = "**$category**"
-                                value = "```css\n${sorted.joinToString("\n") { it.name }}\n```"
+                                value = "```fix\n${sorted.joinToString("\n") { it.name }}\n```"
                                 inline = true
                             }
                         }
@@ -135,7 +135,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
                 .toList()
                 .sortedByDescending { it.second.size }
 
-        val chunks = allMacros.chunked(25)
+        val chunks = allMacros.chunked(1)
 
         event.respondMenu {
             chunks.map {
@@ -145,11 +145,14 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
 
                     if (it.isNotEmpty()) {
                         it.map { (channel, macros) ->
-                            field {
-                                name = "**$channel**"
-                                value = "```css\n${macros.joinToString("\n") { it.name }}\n```"
-                                inline = true
+                            macros.chunked(15).map {
+                                field {
+                                    name = "**$channel**"
+                                    value = "```fix\n${it.joinToString("\n") { it.name }}\n```"
+                                    inline = true
+                                }
                             }
+
                         }
                     }
                 }
