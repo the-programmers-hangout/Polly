@@ -3,11 +3,13 @@ package me.moeszyslak.polly.commands
 import me.jakejmattson.discordkt.api.arguments.AnyArg
 import me.jakejmattson.discordkt.api.arguments.ChannelArg
 import me.jakejmattson.discordkt.api.arguments.RoleArg
+import me.jakejmattson.discordkt.api.arguments.TimeArg
 import me.jakejmattson.discordkt.api.dsl.commands
 import me.moeszyslak.polly.conversations.configurationConversation
 import me.moeszyslak.polly.data.Configuration
 import me.moeszyslak.polly.extensions.requiredPermissionLevel
 import me.moeszyslak.polly.services.Permission
+import me.moeszyslak.polly.utilities.timeToString
 
 fun guildConfigurationCommands(configuration: Configuration) = commands("Basics") {
 
@@ -44,7 +46,7 @@ fun guildConfigurationCommands(configuration: Configuration) = commands("Basics"
         requiredPermissionLevel = Permission.STAFF
         execute(RoleArg) {
             val requiredRole = args.first
-            val config = configuration[(guild.id.longValue)] ?: return@execute
+            val config = configuration[guild.id.longValue] ?: return@execute
 
             config.staffRole = requiredRole.id.longValue
             configuration.save()
@@ -58,12 +60,26 @@ fun guildConfigurationCommands(configuration: Configuration) = commands("Basics"
         requiredPermissionLevel = Permission.STAFF
         execute(ChannelArg) {
             val logChannel = args.first
-            val config = configuration[(guild.id.longValue)] ?: return@execute
+            val config = configuration[guild.id.longValue] ?: return@execute
 
             config.staffRole = logChannel.id.longValue
             configuration.save()
 
             respond("Log channel set to ${logChannel.name}")
+        }
+    }
+
+    guildCommand("Cooldown") {
+        description = "Set the cooldown between macro invokes"
+        requiredPermissionLevel = Permission.STAFF
+        execute(TimeArg) {
+            val cooldown = args.first
+            val config = configuration[guild.id.longValue] ?: return@execute
+
+            config.channelCooldown = cooldown
+            configuration.save()
+
+            respond("Macro cooldown set to ${timeToString(cooldown.toLong() * 1000)}")
         }
     }
 }
