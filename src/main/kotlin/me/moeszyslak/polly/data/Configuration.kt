@@ -14,13 +14,14 @@ data class Configuration(
     operator fun get(id: GuildId) = guildConfigurations[id]
     fun hasGuildConfig(guildId: GuildId) = guildConfigurations.containsKey(guildId)
 
-    fun setup(guildId: GuildId, logChannel: Channel, prefix: String, staffRole: Role) {
+    fun setup(guildId: GuildId, logChannel: Channel, prefix: String, staffRole: Role, cooldown: Double) {
         if (guildConfigurations[guildId] != null) return
 
         val newConfiguration = GuildConfiguration(
                 logChannel.id.longValue,
                 prefix,
                 staffRole.id.longValue,
+                cooldown,
                 mutableSetOf()
         )
 
@@ -33,5 +34,6 @@ data class GuildConfiguration(
         var logChannel: Long,
         var prefix: String,
         var staffRole: Long,
+        var channelCooldown: Double,
         var ignoredUsers: MutableSet<Long>
 )
