@@ -1,5 +1,6 @@
 package me.moeszyslak.polly.services
 
+import com.gitlab.kordlib.common.entity.Snowflake
 import com.gitlab.kordlib.core.behavior.channel.MessageChannelBehavior
 import com.gitlab.kordlib.core.behavior.getChannelOf
 import com.gitlab.kordlib.core.entity.Guild
@@ -7,6 +8,8 @@ import com.gitlab.kordlib.core.entity.channel.TextChannel
 import com.gitlab.kordlib.core.event.message.MessageCreateEvent
 import com.gitlab.kordlib.kordx.emoji.Emojis
 import com.gitlab.kordlib.kordx.emoji.toReaction
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.jakejmattson.discordkt.api.Discord
 import me.jakejmattson.discordkt.api.annotations.Service
 import me.jakejmattson.discordkt.api.dsl.CommandEvent
@@ -194,6 +197,8 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
     }
 }
 
+val macroCooldown = mutableListOf<Pair<Snowflake, Macro>>()
+
 fun macroListener(macroService: MacroService, configuration: Configuration) = listeners {
     on<MessageCreateEvent> {
         val guild = getGuild() ?: return@on
@@ -203,11 +208,8 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
             return@on
         }
 
-        val prefix = configuration[guildId]?.prefix
-
-        if (prefix.isNullOrEmpty()) {
-            return@on
-        }
+        val guildConfiguration = configuration[guildId]?: return@on
+        val prefix = guildConfiguration.prefix
 
         if (!message.content.startsWith(prefix)) {
             return@on
@@ -219,10 +221,21 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
                 .firstOrNull()
                 ?: return@on
 
-        val macro = macroService.findMacro(guildId, macroName, message.channel)
+        val macro = macroService.findMacro(guildId, macroName, message.channel) ?: return@on
 
-        if (macro != null) {
-            if (message.content.startsWith("$prefix$prefix")) {
+        if(macroCooldown.contains(message.channelId to macro)) {
+            message.addReaction(Emojis.clock4.toReaction())
+            return@on
+        }
+
+        macroCooldown += message.channelId to macro
+        launch {
+            val cooldown = guildConfiguration.channelCooldown * 1000
+            delay(cooldown.toLong())
+            macroCooldown -= message.channelId to macro
+        }
+
+        if (message.content.startsWith("$prefix$prefix")) {
                 message.addReaction(Emojis.eyes.toReaction())
             } else {
                 message.delete()
@@ -236,9 +249,6 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
             guild.getChannelOf<TextChannel>(logChannelId.toSnowflake())
                     .createMessage("${member.username} :: ${member.id.value} " +
                             "invoked $macroName in ${message.channel.mention}")
-
-        }
-
 
     }
 }

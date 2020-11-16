@@ -63,6 +63,7 @@ suspend fun main() {
             if (guildConfiguration != null) {
                 val staffRole = it.guild!!.getRole(guildConfiguration.staffRole.toSnowflake())
                 val loggingChannel = it.guild!!.getChannel(guildConfiguration.logChannel.toSnowflake())
+                val cooldown = guildConfiguration.channelCooldown
 
                 field {
 
@@ -70,6 +71,7 @@ suspend fun main() {
                     value = "```" +
                             "Staff Role: ${staffRole.name}\n" +
                             "Logging Channel: ${loggingChannel.name}\n" +
+                            "Channel Cooldown: $cooldown seconds\n" +
                             "```"
                 }
             }
