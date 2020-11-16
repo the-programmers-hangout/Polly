@@ -176,12 +176,18 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
     fun findMacro(guild: GuildId, name_raw: String, channel: MessageChannelBehavior): Macro? {
         val name = name_raw.toLowerCase()
         val channelId = channel.id.value
-
-        return store.forGuild(guild) {
+        val macro: Macro? = store.forGuild(guild) {
             // first try to find a channel specific macro
             // if it fails, default to a global macro
             it["$name#$channelId"] ?: it["$name#"]
         }
+
+        macro?.let {
+            macro.uses++
+            store.save()
+        }
+
+        return macro
     }
 }
 
@@ -218,6 +224,7 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
             } else {
                 message.delete()
             }
+
 
             message.channel.createMessage(macro.contents)
 

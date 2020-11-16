@@ -1,6 +1,5 @@
 package me.moeszyslak.polly.data
 
-import com.gitlab.kordlib.core.entity.Guild
 import me.jakejmattson.discordkt.api.dsl.Data
 
 data class MacroStore(
@@ -17,4 +16,5 @@ data class Macro(
         var contents: String,
         val channel: String?,
         var category: String,
+        var uses: Int = 0
 )
