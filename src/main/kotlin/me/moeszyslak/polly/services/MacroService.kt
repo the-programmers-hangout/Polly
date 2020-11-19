@@ -139,7 +139,6 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
                 .sortedByDescending { it.second.size }
 
         val chunks = allMacros.chunked(1)
-
         event.respondMenu {
             chunks.map {
                 page {
@@ -161,6 +160,42 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
                 }
             }
         }
+    }
+
+    suspend fun macroStats(event: CommandEvent<*>, guild: Guild, asc: Boolean) {
+        val allMacros = store.forGuild(guild.id.longValue) { it }
+                .map { it.value }
+                .groupBy { it.channel?.toSnowflakeOrNull()?.let { guild.getChannel(it).name } ?: "Global Macros" }
+                .toList()
+                .sortedByDescending { it.second.size }
+                .map { (cat, macros) ->
+                    cat to
+                            if (asc) macros.sortedBy { it.uses }.take(10)
+                            else macros.sortedByDescending { it.uses }.take(10)
+                }
+
+        val chunks = allMacros.chunked(1)
+        event.respondMenu {
+            chunks.map {
+                page {
+                    title = if (asc) "Least used macros" else "Top Used Macros"
+                    color = event.discord.configuration.theme
+                    if (it.isNotEmpty()) {
+                        it.map { (channel, macros) ->
+                            field {
+                                name = "**$channel**"
+                                value = "```properties\n" +
+                                        macros.mapIndexed { i, m -> "${i + 1}. ${m.name} - ${m.uses} uses" }
+                                                .joinToString("\n") +
+                                        "```"
+                                inline = true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     }
 
     private fun getMacrosAvailableIn(guild: GuildId, channel: TextChannel): List<Macro> {
@@ -208,7 +243,7 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
             return@on
         }
 
-        val guildConfiguration = configuration[guildId]?: return@on
+        val guildConfiguration = configuration[guildId] ?: return@on
         val prefix = guildConfiguration.prefix
 
         if (!message.content.startsWith(prefix)) {
@@ -223,7 +258,7 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
 
         val macro = macroService.findMacro(guildId, macroName, message.channel) ?: return@on
 
-        if(macroCooldown.contains(message.channelId to macro)) {
+        if (macroCooldown.contains(message.channelId to macro)) {
             message.addReaction(Emojis.clock4.toReaction())
             return@on
         }
@@ -236,19 +271,19 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
         }
 
         if (message.content.startsWith("$prefix$prefix")) {
-                message.addReaction(Emojis.eyes.toReaction())
-            } else {
-                message.delete()
-            }
+            message.addReaction(Emojis.eyes.toReaction())
+        } else {
+            message.delete()
+        }
 
 
-            message.channel.createMessage(macro.contents)
+        message.channel.createMessage(macro.contents)
 
-            val logChannelId = configuration[guildId]?.logChannel ?: return@on
+        val logChannelId = configuration[guildId]?.logChannel ?: return@on
 
-            guild.getChannelOf<TextChannel>(logChannelId.toSnowflake())
-                    .createMessage("${member.username} :: ${member.id.value} " +
-                            "invoked $macroName in ${message.channel.mention}")
+        guild.getChannelOf<TextChannel>(logChannelId.toSnowflake())
+                .createMessage("${member.username} :: ${member.id.value} " +
+                        "invoked $macroName in ${message.channel.mention}")
 
     }
 }

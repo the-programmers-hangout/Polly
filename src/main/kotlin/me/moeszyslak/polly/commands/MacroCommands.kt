@@ -3,6 +3,7 @@ package me.moeszyslak.polly.commands
 import com.gitlab.kordlib.core.entity.channel.TextChannel
 import me.jakejmattson.discordkt.api.arguments.AnyArg
 import me.jakejmattson.discordkt.api.arguments.ChannelArg
+import me.jakejmattson.discordkt.api.arguments.ChoiceArg
 import me.jakejmattson.discordkt.api.arguments.EveryArg
 import me.jakejmattson.discordkt.api.dsl.commands
 import me.moeszyslak.polly.extensions.requiredPermissionLevel
@@ -70,10 +71,22 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
     }
 
     guildCommand("ListAllMacros") {
-        description = "Lists all macros available in the guild.id.longValue, grouped by channel."
+        description = "Lists all macros available in the guild, grouped by channel."
         requiredPermissionLevel = Permission.USER
         execute {
             macroService.listAllMacros(this, guild)
+        }
+    }
+
+    guildCommand("MacroStats") {
+        description = "Get statistics on most and least used macros"
+        requiredPermissionLevel = Permission.USER
+        execute(ChoiceArg("Sort", "asc", "desc")) {
+            when(val choice = args.first.toLowerCase()) {
+                "asc" -> macroService.macroStats(this, guild, true)
+                "desc" -> macroService.macroStats(this, guild, false)
+                else -> respond("Invalid choice provided: $choice")
+            }
         }
     }
 }

@@ -27,8 +27,9 @@
 | AddMacro        | Name, Category, Contents          | Adds a macro (for all channels)                                                                               |
 | EditCategory    | Name, (Channel), New Category     | Edits the category of a macro                                                                                 |
 | EditMacro       | Name, (Channel), Contents         | Edits the contents of a macro                                                                                 |
-| ListAllMacros   |                                   | Lists all macros available in the guild.id.longValue, grouped by channel.                                     |
+| ListAllMacros   |                                   | Lists all macros available in the guild, grouped by channel.                                                  |
 | ListMacros      | (Channel)                         | Lists all macros available in the given channel. If no channel is specified, defaults to the current channel. |
+| MacroStats      | Sort                              | Get statistics on most and least used macros                                                                  |
 | RemoveMacro     | Name, (Channel)                   | Removes a macro                                                                                               |
 
 ## Utility
