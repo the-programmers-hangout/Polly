@@ -81,11 +81,10 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
     guildCommand("MacroStats") {
         description = "Get statistics on most and least used macros"
         requiredPermissionLevel = Permission.USER
-        execute(ChoiceArg("Sort", "asc", "desc")) {
-            when(val choice = args.first.toLowerCase()) {
+        execute(ChoiceArg("asc/desc", "asc", "desc").makeOptional("desc")) {
+            when(args.first.toLowerCase()) {
                 "asc" -> macroService.macroStats(this, guild, true)
                 "desc" -> macroService.macroStats(this, guild, false)
-                else -> respond("Invalid choice provided: $choice")
             }
         }
     }
