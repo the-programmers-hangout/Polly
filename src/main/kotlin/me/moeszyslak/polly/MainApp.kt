@@ -7,6 +7,7 @@ import com.gitlab.kordlib.kordx.emoji.Emojis
 import me.jakejmattson.discordkt.api.dsl.bot
 import me.jakejmattson.discordkt.api.extensions.toSnowflake
 import me.moeszyslak.polly.data.Configuration
+import me.moeszyslak.polly.data.MacroStore
 import me.moeszyslak.polly.extensions.requiredPermissionLevel
 import me.moeszyslak.polly.services.PermissionsService
 import me.moeszyslak.polly.services.StatisticsService
@@ -120,6 +121,10 @@ suspend fun main() {
                 return@permissions false
 
             return@permissions true
+        }
+
+        onStart {
+            getInjectionObjects(MacroStore::class).populate()
         }
     }
 }

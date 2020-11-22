@@ -23,13 +23,16 @@
 ## Macros
 | Commands        | Arguments                         | Description                                                                                                   |
 | --------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| AddAlias        | Name, (Channel), Alias            | Add an alias to a macro                                                                                       |
 | AddChannelMacro | Name, Category, Channel, Contents | Adds a macro to a specific channel                                                                            |
 | AddMacro        | Name, Category, Contents          | Adds a macro (for all channels)                                                                               |
 | EditCategory    | Name, (Channel), New Category     | Edits the category of a macro                                                                                 |
 | EditMacro       | Name, (Channel), Contents         | Edits the contents of a macro                                                                                 |
 | ListAllMacros   |                                   | Lists all macros available in the guild, grouped by channel.                                                  |
 | ListMacros      | (Channel)                         | Lists all macros available in the given channel. If no channel is specified, defaults to the current channel. |
-| MacroStats      | Sort                              | Get statistics on most and least used macros                                                                  |
+| MacroInfo       | Name, (Channel)                   | Get Information for a macro                                                                                   |
+| MacroStats      | (asc/desc)                        | Get statistics on most and least used macros                                                                  |
+| RemoveAlias     | Name, (Channel), Alias            | Remove an alias from a macro                                                                                  |
 | RemoveMacro     | Name, (Channel)                   | Removes a macro                                                                                               |
 
 ## Utility
