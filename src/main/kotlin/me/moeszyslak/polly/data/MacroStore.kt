@@ -6,11 +6,20 @@ import me.jakejmattson.discordkt.api.dsl.Data
 data class MacroStore(
         val macros: MutableMap<GuildId, MutableMap<String, Macro>> = mutableMapOf()) : Data("config/macros.json", killIfGenerated = false) {
     @Transient
-    val aliases: MutableMap<GuildId, MutableMap<String, Macro>> = mutableMapOf()
+    var aliases: MutableMap<GuildId, Map<String, String>> = mutableMapOf()
 
-    fun <R> withAliases(guildId: GuildId, fn: (MutableMap<String, Macro>) -> R): R {
+    fun <R> allAliases(guildId: GuildId, fn: (Map<String, String>) -> R): R {
         val aliases = aliases[guildId] ?: mutableMapOf()
         return fn(aliases)
+    }
+
+    fun <R> findAlias(guildId: GuildId, alias: String, channel: String, fn: (Macro) -> R): R? {
+        return allAliases(guildId) { aliases ->
+            val macroString = aliases["$alias#$channel"] ?: return@allAliases null
+            val macro = macros[guildId]?.get(macroString) ?: return@allAliases null
+
+            fn(macro)
+        }
     }
 
     fun <R> forGuild(guildId: GuildId, fn: (MutableMap<String, Macro>) -> R): R {
@@ -29,19 +38,20 @@ data class MacroStore(
             return
         }
         val macros = macros[guildId] ?: return
-        aliases[guildId] = mutableMapOf()
-        macros.forEach { (_, macro) ->
-            aliases[guildId]!!["${macro.name}#${macro.channel()}"] = macro.copy(parent = macro.name)
+        val updated = mutableMapOf<String, String>()
+        macros.forEach { (key, macro) ->
+            updated["${macro.name}#${macro.channel()}"] = key
             macro.aliases.forEach {
-                aliases[guildId]!!["${it}#${macro.channel}"] = macro.copy(name = it, parent = macro.name)
+                updated["$it#${macro.channel}"] = key
             }
         }
+
+        aliases[guildId] = updated.toMap()
     }
 }
 
 data class Macro(
         val name: String,
-        var parent: String = "",
         var aliases: MutableList<String> = mutableListOf(),
         var contents: String,
         val channel: String?,
@@ -56,9 +66,9 @@ data class Macro(
     fun displayNames() =
             listOf(listOf(name), aliases)
                     .flatten()
-                    .joinToString(", ") { "`$it`" }
+                    .joinToString(" | ")
 }
 
 fun newMacro(name: String, contents: String, channel: String, category: String): Macro {
-    return Macro(name, "", mutableListOf(), contents, channel, category)
+    return Macro(name, mutableListOf(), contents, channel, category)
 }
