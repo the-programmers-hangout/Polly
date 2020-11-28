@@ -175,18 +175,21 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         val name = name_raw.toLowerCase()
         val alias = alias_raw.toLowerCase()
 
-        val macro = store.forGuild(guild) { macros ->
+
+        // true -> removed macro successfully
+        // false -> the alias was not found
+        // null -> the macro was not found
+        val result = store.forGuild(guild) { macros ->
             macros["$name#$channelId"]?.let {
-                it.aliases.remove(alias)
-                return@forGuild it
+                return@forGuild it.aliases.remove(alias)
             }
             return@forGuild null
         }
 
-        return if (macro != null) {
-            "Success. Macro `$name` no longer has the alias `$alias` ${if (channel == null) "globally" else "in channel ${channel.mention}"}"
-        } else {
-            "Cannot find a macro by that name. If it is a channel specific macro you need to provide the channel as well."
+        return when (result) {
+            true -> "Success. Macro `$name` no longer has the alias `$alias` ${if (channel == null) "globally" else "in channel ${channel.mention}"}"
+            false -> "Cannot find the alias `$alias` of the macro. If it is a channel specific macro you need to provide the channel as well"
+            null -> "Cannot find a macro by that name. If it is a channel specific macro you need to provide the channel as well."
         }
     }
 
