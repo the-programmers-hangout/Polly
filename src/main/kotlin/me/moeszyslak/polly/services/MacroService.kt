@@ -13,35 +13,79 @@ import kotlinx.coroutines.launch
 import me.jakejmattson.discordkt.api.Discord
 import me.jakejmattson.discordkt.api.annotations.Service
 import me.jakejmattson.discordkt.api.dsl.CommandEvent
+import me.jakejmattson.discordkt.api.dsl.GuildCommandEvent
 import me.jakejmattson.discordkt.api.dsl.listeners
 import me.jakejmattson.discordkt.api.extensions.toSnowflake
 import me.jakejmattson.discordkt.api.extensions.toSnowflakeOrNull
 import me.moeszyslak.polly.commands.isIgnored
-import me.moeszyslak.polly.data.Configuration
-import me.moeszyslak.polly.data.GuildId
-import me.moeszyslak.polly.data.Macro
-import me.moeszyslak.polly.data.MacroStore
+import me.moeszyslak.polly.data.*
 
 
 @Service
 class MacroService(private val store: MacroStore, private val discord: Discord) {
-    fun addMacro(guild: GuildId, name_raw: String, category_raw: String, channel: TextChannel?, contents: String): String {
+    private val allCommands
+        get() = discord.commands.map { it.names }.flatten().map { it.toLowerCase() }
+
+    suspend fun macroInfo(event: GuildCommandEvent<*>, guild: GuildId, name_raw: String, channel: TextChannel?) {
         val channelId = channel?.id?.value ?: ""
         val name = name_raw.toLowerCase()
-        val category = category_raw.toLowerCase()
 
-        if (name in discord.commands.map { it.names }.flatten().map { it.toLowerCase() }) {
-            return "A command with that name already exists."
+        val parent = store.findAlias(guild, name, channelId) { it } ?: run {
+            event.respond("Cannot find a macro by that name. If it is a channel specific macro you need to provide the channel as well.")
+            return
         }
 
+        event.respond {
+            title = "Macro - $name"
+            color = discord.configuration.theme
+            description = "```${parent.contents}```"
+            field {
+                this.name = "Macro Name"
+                value = "```fix\n${parent.name}```"
+                inline = true
+            }
+            field {
+                this.name = "Aliases"
+                value = if (parent.aliases.isNullOrEmpty()) "None"
+                else "```fix\n${parent.aliases.joinToString("\n")}```"
+                inline = true
+            }
+            field {
+                this.name = "Uses"
+                value = parent.uses.toString()
+            }
+            field {
+                this.name = "Category"
+                value = parent.category
+                inline = true
+            }
+            field {
+                this.name = "Channel"
+                value = if (parent.channel() == "") "Global Macro"
+                else event.guild.getChannel(Snowflake(parent.channel!!)).mention
+                inline = true
+            }
+        }
+    }
+
+    fun addMacro(guild: GuildId, nameRaw: String, categoryRaw: String, channel: TextChannel?, contents: String): String {
+        val channelId = channel?.id?.value ?: ""
+        val name = nameRaw.toLowerCase()
+        val category = categoryRaw.toLowerCase()
+
+        if (name in allCommands) return "A command with that name already exists."
+
+        val alias = store.findAlias(guild, name, category) { it }
+        if (alias != null) return "A macro or alias with that name already exists."
+
         val result = store.forGuild(guild) {
-            it.putIfAbsent("$name#$channelId", Macro(name, contents, channelId, category))
+            it.putIfAbsent("$name#$channelId", newMacro(name, contents, channelId, category))
         }
 
         return if (result == null) {
-            "Success. Macro `$name` is now available ${if (channel == null) "globally" else "on channel ${channel.mention}"} and will respond with ```\n$contents\n```"
+            "Success. Macro `$name` is now available ${if (channel == null) "globally" else "in channel ${channel.mention}"} and will respond with ```\n$contents\n```"
         } else {
-            "A macro with that name already exists."
+            "A macro or alias with that name already exists."
         }
     }
 
@@ -54,7 +98,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
 
         return if (result != null) {
-            "Success. Macro `$name` has been removed"
+            "Success. Macro `${result.displayNames()}` has been removed"
         } else {
             "Cannot find a macro by that name. If it is a channel specific macro you need to provide the channel as well."
         }
@@ -64,17 +108,17 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         val channelId = channel?.id?.value ?: ""
         val name = name_raw.toLowerCase()
 
-        val result = store.forGuild(guild) {
-            if (it.containsKey("$name#$channelId")) {
-                it["$name#$channelId"]!!.contents = contents
-                true
-            } else {
-                false
+        val macro = store.forGuild(guild) { macros ->
+            macros["$name#$channelId"]?.let {
+                it.contents = contents
+                return@forGuild it
             }
+            return@forGuild null
         }
 
-        return if (result) {
-            "Success. Macro `$name` available ${if (channel == null) "globally" else "on channel ${channel.mention}"} will now respond with ```\n$contents\n```"
+        return if (macro != null) {
+            val names = macro.displayNames()
+            "Success. Macro `$names` available ${if (channel == null) "globally" else "in channel ${channel.mention}"} will now respond with ```\n$contents\n```"
         } else {
             "Cannot find a macro by that name. If it is a channel specific macro you need to provide the channel as well."
         }
@@ -85,19 +129,67 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         val name = name_raw.toLowerCase()
         val category = category_raw.toLowerCase()
 
-        val result = store.forGuild(guild) {
-            if (it.containsKey("$name#$channelId")) {
-                it["$name#$channelId"]!!.category = category
-                true
-            } else {
-                false
+        val macro = store.forGuild(guild) { macros ->
+            macros["$name#$channelId"]?.let {
+                it.category = category
+                return@forGuild it
             }
+            return@forGuild null
         }
 
-        return if (result) {
-            "Success. Macro `$name` available ${if (channel == null) "globally" else "on channel ${channel.mention}"} is now in category `${category}`"
+        return if (macro != null) {
+            val names = macro.displayNames()
+            "Success. Macro `$names` available ${if (channel == null) "globally" else "in channel ${channel.mention}"} is now in category `${category}`"
         } else {
             "Cannot find a macro by that name. If it is a channel specific macro you need to provide the channel as well."
+        }
+    }
+
+    fun addMacroAlias(guild: GuildId, name_raw: String, channel: TextChannel?, alias_raw: String): String {
+        val channelId = channel?.id?.value ?: ""
+        val name = name_raw.toLowerCase()
+        val alias = alias_raw.toLowerCase()
+
+        if (alias in allCommands) return "A command with that alias already exists."
+
+        val exists = store.findAlias(guild, alias, channelId) { it } != null
+        if (exists) return "A macro or alias already exists by that name."
+
+        val macro = store.forGuild(guild) { macros ->
+            macros["$name#$channelId"]?.let {
+                it.aliases.add(alias)
+                return@forGuild it
+            }
+            return@forGuild null
+        }
+
+        return if (macro != null) {
+            "Success. Macro `$name` now has the alias `$alias` ${if (channel == null) "globally" else "in channel ${channel.mention}"}"
+        } else {
+            "Cannot find a macro by that name. If it is a channel specific macro you need to provide the channel as well."
+        }
+    }
+
+    fun removeMacroAlias(guild: GuildId, name_raw: String, channel: TextChannel?, alias_raw: String): String {
+        val channelId = channel?.id?.value ?: ""
+        val name = name_raw.toLowerCase()
+        val alias = alias_raw.toLowerCase()
+
+
+        // true -> removed macro successfully
+        // false -> the alias was not found
+        // null -> the macro was not found
+        val result = store.forGuild(guild) { macros ->
+            macros["$name#$channelId"]?.let {
+                return@forGuild it.aliases.remove(alias)
+            }
+            return@forGuild null
+        }
+
+        return when (result) {
+            true -> "Success. Macro `$name` no longer has the alias `$alias` ${if (channel == null) "globally" else "in channel ${channel.mention}"}"
+            false -> "Cannot find the alias `$alias` of the macro. If it is a channel specific macro you need to provide the channel as well"
+            null -> "Cannot find a macro by that name. If it is a channel specific macro you need to provide the channel as well."
         }
     }
 
@@ -121,7 +213,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
 
                             field {
                                 name = "**$category**"
-                                value = "```fix\n${sorted.joinToString("\n") { it.name }}\n```"
+                                value = "```fix\n${sorted.joinToString("\n") { it.displayNames() }}\n```"
                                 inline = true
                             }
                         }
@@ -134,7 +226,9 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
     suspend fun listAllMacros(event: CommandEvent<*>, guild: Guild) {
         val allMacros = store.forGuild(guild.id.longValue) { it }
                 .map { it.value }
-                .groupBy { it.channel?.toSnowflakeOrNull()?.let { guild.getChannel(it).name } ?: "Global Macros" }
+                .groupBy {
+                    it.channel?.toSnowflakeOrNull()?.let { guild.getChannel(it).name } ?: "Global Macros"
+                }
                 .toList()
                 .sortedByDescending { it.second.size }
 
@@ -150,7 +244,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
                             macros.chunked(15).map {
                                 field {
                                     name = "**$channel**"
-                                    value = "```fix\n${it.joinToString("\n") { it.name }}\n```"
+                                    value = "```fix\n${it.joinToString("\n") { it.displayNames() }}\n```"
                                     inline = true
                                 }
                             }
@@ -165,7 +259,9 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
     suspend fun macroStats(event: CommandEvent<*>, guild: Guild, asc: Boolean) {
         val allMacros = store.forGuild(guild.id.longValue) { it }
                 .map { it.value }
-                .groupBy { it.channel?.toSnowflakeOrNull()?.let { guild.getChannel(it).name } ?: "Global Macros" }
+                .groupBy {
+                    it.channel?.toSnowflakeOrNull()?.let { guild.getChannel(it).name } ?: "Global Macros"
+                }
                 .toList()
                 .sortedByDescending { it.second.size }
                 .map { (cat, macros) ->
@@ -200,33 +296,22 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
 
     private fun getMacrosAvailableIn(guild: GuildId, channel: TextChannel): List<Macro> {
         val macroList = store.forGuild(guild) { macros ->
-            macros.filter {
-                it.key.endsWith('#') || it.key.takeLast(18) == channel.id.value
-            }
+            macros.filterValues { it.canRun(channel) }
         }
 
         return macroList.filterKeys { key ->
-            if (key.endsWith('#')) {
-                macroList.keys.none { it.startsWith(key) && !it.endsWith('#') }
-            } else {
-                true
-            }
+            if (key.endsWith('#')) macroList.keys.none { it == "$key#${channel.id.value}" }
+            else true
         }.map { it.value }
     }
 
     fun findMacro(guild: GuildId, name_raw: String, channel: MessageChannelBehavior): Macro? {
         val name = name_raw.toLowerCase()
         val channelId = channel.id.value
-        val macro: Macro? = store.forGuild(guild) {
-            // first try to find a channel specific macro
-            // if it fails, default to a global macro
-            it["$name#$channelId"] ?: it["$name#"]
-        }
+        val macro = store.findAlias(guild, name, channelId) { it }
+                ?: store.findAlias(guild, name, "") { it }
 
-        macro?.let {
-            macro.uses++
-            store.save()
-        }
+        if (macro != null) macro.uses++
 
         return macro
     }

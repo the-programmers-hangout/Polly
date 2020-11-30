@@ -11,6 +11,15 @@ import me.moeszyslak.polly.services.MacroService
 import me.moeszyslak.polly.services.Permission
 
 fun macroCommands(macroService: MacroService) = commands("Macros") {
+    guildCommand("MacroInfo") {
+        description = "Get Information for a macro"
+        requiredPermissionLevel = Permission.USER
+
+        execute(AnyArg("Name"), ChannelArg<TextChannel>("Channel").makeNullableOptional()) {
+            macroService.macroInfo(this, guild.id.longValue, args.first, args.second)
+        }
+    }
+
     guildCommand("AddMacro") {
         description = "Adds a macro (for all channels)"
         requiredPermissionLevel = Permission.STAFF
@@ -62,6 +71,22 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
+    guildCommand("AddAlias") {
+        description = "Add an alias to a macro"
+        requiredPermissionLevel = Permission.STAFF
+        execute(AnyArg("Name"), ChannelArg<TextChannel>("Channel").makeNullableOptional(), AnyArg("Alias")) {
+            respond(macroService.addMacroAlias(guild.id.longValue, args.first, args.second, args.third))
+        }
+    }
+
+    guildCommand("RemoveAlias") {
+        description = "Remove an alias from a macro"
+        requiredPermissionLevel = Permission.STAFF
+        execute(AnyArg("Name"), ChannelArg<TextChannel>("Channel").makeNullableOptional(), AnyArg("Alias")) {
+            respond(macroService.removeMacroAlias(guild.id.longValue, args.first, args.second, args.third))
+        }
+    }
+
     guildCommand("ListMacros") {
         description = "Lists all macros available in the given channel. If no channel is specified, defaults to the current channel."
         requiredPermissionLevel = Permission.USER
@@ -82,7 +107,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         description = "Get statistics on most and least used macros"
         requiredPermissionLevel = Permission.USER
         execute(ChoiceArg("asc/desc", "asc", "desc").makeOptional("desc")) {
-            when(args.first.toLowerCase()) {
+            when (args.first.toLowerCase()) {
                 "asc" -> macroService.macroStats(this, guild, true)
                 "desc" -> macroService.macroStats(this, guild, false)
             }
