@@ -113,4 +113,13 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
             }
         }
     }
+
+    guildCommand("SearchMacros") {
+       description = "Search the available macros available"
+        requiredPermissionLevel = Permission.USER
+        execute(EveryArg) {
+            val (query) = args
+            macroService.searchMacro(this, query, channel, guild.id.longValue)
+        }
+    }
 }

@@ -19,6 +19,7 @@ import me.jakejmattson.discordkt.api.extensions.toSnowflake
 import me.jakejmattson.discordkt.api.extensions.toSnowflakeOrNull
 import me.moeszyslak.polly.commands.isIgnored
 import me.moeszyslak.polly.data.*
+import me.xdrop.fuzzywuzzy.FuzzySearch
 
 
 @Service
@@ -292,6 +293,43 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
             }
         }
 
+    }
+
+    suspend fun searchMacro(event: CommandEvent<*>, query: String, channel: TextChannel, guild: GuildId) {
+        val macros = getMacrosAvailableIn(guild, channel)
+        val aliases = macros.flatMap { m -> m.aliases.toMutableList().also { it.add(m.name) } }
+        val topNames = FuzzySearch.extractSorted(query, aliases, 70).take(5)
+        val topContents = macros.map { it.name to FuzzySearch.tokenSetRatio(query, it.contents) }
+            .filter { (_, score) -> score >= 70 }
+            .sortedByDescending { it.second }
+            .take(5)
+
+        if (topNames.isEmpty() && topContents.isEmpty()) {
+            event.respond("No results found")
+            return
+        }
+
+        event.respond {
+            title = "Search Results - '$query'"
+            color = event.discord.configuration.theme
+
+            field {
+                name = "Top Results - By names and aliases"
+                value = "```properties\n" + topNames.mapIndexed { i, result ->
+                    "${i + 1}. ${result.string}"
+                }.joinToString("\n") + "```"
+
+                if (topNames.isEmpty()) value = "No results found"
+            }
+            field {
+                name = "Top Results - By contents"
+                value = "```properties\n" + topContents.mapIndexed { i, (name, score) ->
+                    "${i + 1}. $name"
+                }.joinToString("\n") + "```"
+                if (topContents.isEmpty()) value = "No results found"
+                inline = true
+            }
+        }
     }
 
     private fun getMacrosAvailableIn(guild: GuildId, channel: TextChannel): List<Macro> {

@@ -15,6 +15,7 @@ repositories {
 
 dependencies {
     implementation("me.jakejmattson:DiscordKt:${Versions.DISCORDKT}")
+    implementation("me.xdrop:fuzzywuzzy:${Versions.FUZZY}")
 }
 
 tasks {
@@ -35,4 +36,5 @@ tasks {
 object Versions {
     const val BOT = "1.0.0"
     const val DISCORDKT = "0.21.3"
+    const val FUZZY = "0.1.1"
 }
