@@ -34,6 +34,7 @@
 | MacroStats      | (asc/desc)                        | Get statistics on most and least used macros                                                                  |
 | RemoveAlias     | Name, (Channel), Alias            | Remove an alias from a macro                                                                                  |
 | RemoveMacro     | Name, (Channel)                   | Removes a macro                                                                                               |
+| SearchMacros    | Text                              | Search the available macros available                                                                         |
 
 ## Utility
 | Commands | Arguments | Description          |
