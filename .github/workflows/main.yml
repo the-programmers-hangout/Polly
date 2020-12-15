@@ -30,4 +30,8 @@ jobs:
         # uses: OrangeLabs-moe/gradle-actions@5e96d4f5eafbe559dae76600102bc799ba210ae6
         uses: OrangeLabs-moe/gradle-actions@v5.0-openjdk-14
         with:
-          args: shadowJar
+          args: shadowJar  
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Polly.jar
+          path: build/libs/Polly.jar
