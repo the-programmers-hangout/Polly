@@ -14,7 +14,7 @@
 </p>
 
 
-> A file listener bot to prevent users uploading certain files
+> A bot that holds a list of macros, to be used on forum discords
 
 ## Setup
 Since this bot has a docker-compose file and is hosted on [DockerHub](https://hub.docker.com/r/theprogrammershangout/polly), all you need to start your own version of Polly locally is:
