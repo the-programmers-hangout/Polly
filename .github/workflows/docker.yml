@@ -29,4 +29,4 @@ jobs:
           context: .
           pull: true
           push: true
-          tags: theprogrammershangout/hawk:latest
+          tags: theprogrammershangout/polly:latest
