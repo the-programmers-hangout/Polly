@@ -1,7 +1,6 @@
 package me.moeszyslak.polly.data
 
-import dev.kord.core.entity.channel.Channel
-import dev.kord.core.entity.channel.TextChannel
+import dev.kord.core.entity.channel.GuildMessageChannel
 import me.jakejmattson.discordkt.api.dsl.Data
 
 data class MacroStore(
@@ -61,8 +60,8 @@ data class Macro(
 ) {
     fun channel() = channel ?: ""
 
-    fun canRun(textChannel: Channel) =
-            (channel == null || channel == "" || channel == textChannel.id.asString)
+    fun canRun(messageChannel: GuildMessageChannel) =
+            (channel == null || channel == "" || channel == messageChannel.id.asString)
 
     fun displayNames() =
             listOf(listOf(name), aliases)

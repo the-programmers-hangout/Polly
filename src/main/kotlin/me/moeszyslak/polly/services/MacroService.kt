@@ -2,11 +2,10 @@ package me.moeszyslak.polly.services
 
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.kColor
-import dev.kord.core.behavior.channel.ChannelBehavior
+import dev.kord.core.behavior.channel.MessageChannelBehavior
 import dev.kord.core.behavior.getChannelOf
 import dev.kord.core.entity.Guild
-import dev.kord.core.entity.channel.Channel
-import dev.kord.core.entity.channel.TextChannel
+import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.x.emoji.Emojis
 import dev.kord.x.emoji.toReaction
@@ -29,7 +28,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
     private val allCommands
         get() = discord.commands.map { it.names }.flatten().map { it.toLowerCase() }
 
-    suspend fun macroInfo(event: GuildCommandEvent<*>, guild: GuildId, name_raw: String, channel: TextChannel?) {
+    suspend fun macroInfo(event: GuildCommandEvent<*>, guild: GuildId, name_raw: String, channel: GuildMessageChannel?) {
         val channelId = channel?.id?.asString ?: ""
         val name = name_raw.toLowerCase()
 
@@ -71,7 +70,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    fun addMacro(guild: GuildId, nameRaw: String, categoryRaw: String, channel: TextChannel?, contents: String): String {
+    fun addMacro(guild: GuildId, nameRaw: String, categoryRaw: String, channel: GuildMessageChannel?, contents: String): String {
         val channelId = channel?.id?.asString ?: ""
         val name = nameRaw.toLowerCase()
         val category = categoryRaw.toLowerCase()
@@ -92,7 +91,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    fun removeMacro(guild: GuildId, name_raw: String, channel: TextChannel?): String {
+    fun removeMacro(guild: GuildId, name_raw: String, channel: GuildMessageChannel?): String {
         val channelId = channel?.id?.value ?: ""
         val name = name_raw.toLowerCase()
 
@@ -107,7 +106,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    fun editMacro(guild: GuildId, name_raw: String, channel: TextChannel?, contents: String): String {
+    fun editMacro(guild: GuildId, name_raw: String, channel: GuildMessageChannel?, contents: String): String {
         val channelId = channel?.id?.value ?: ""
         val name = name_raw.toLowerCase()
 
@@ -127,7 +126,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    fun editMacroCategory(guild: GuildId, name_raw: String, channel: TextChannel?, category_raw: String): String {
+    fun editMacroCategory(guild: GuildId, name_raw: String, channel: GuildMessageChannel?, category_raw: String): String {
         val channelId = channel?.id?.value ?: ""
         val name = name_raw.toLowerCase()
         val category = category_raw.toLowerCase()
@@ -148,7 +147,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    fun addMacroAlias(guild: GuildId, name_raw: String, channel: TextChannel?, alias_raw: String): String {
+    fun addMacroAlias(guild: GuildId, name_raw: String, channel: GuildMessageChannel?, alias_raw: String): String {
         val channelId = channel?.id?.asString ?: ""
         val name = name_raw.toLowerCase()
         val alias = alias_raw.toLowerCase()
@@ -173,7 +172,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    fun removeMacroAlias(guild: GuildId, name_raw: String, channel: TextChannel?, alias_raw: String): String {
+    fun removeMacroAlias(guild: GuildId, name_raw: String, channel: GuildMessageChannel?, alias_raw: String): String {
         val channelId = channel?.id?.value ?: ""
         val name = name_raw.toLowerCase()
         val alias = alias_raw.toLowerCase()
@@ -196,7 +195,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    suspend fun listMacros(event: CommandEvent<*>, guild: GuildId, channel: TextChannel) = with(event) {
+    suspend fun listMacros(event: CommandEvent<*>, guild: GuildId, channel: GuildMessageChannel) = with(event) {
         val availableMacros = getMacrosAvailableIn(guild, channel)
                 .groupBy { it.category }
                 .toList()
@@ -297,7 +296,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
 
     }
 
-    suspend fun searchMacro(event: CommandEvent<*>, query: String, channel: Channel, guild: GuildId) {
+    suspend fun searchMacro(event: CommandEvent<*>, query: String, channel: GuildMessageChannel, guild: GuildId) {
         val macros = getMacrosAvailableIn(guild, channel)
         val aliases = macros.flatMap { m -> m.aliases.toMutableList().also { it.add(m.name) } }
         val topNames = FuzzySearch.extractSorted(query, aliases, 70).take(5)
@@ -334,7 +333,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    private fun getMacrosAvailableIn(guild: GuildId, channel: Channel): List<Macro> {
+    private fun getMacrosAvailableIn(guild: GuildId, channel: GuildMessageChannel): List<Macro> {
         val macroList = store.forGuild(guild) { macros ->
             macros.filterValues { it.canRun(channel) }
         }
@@ -345,7 +344,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }.map { it.value }
     }
 
-    fun findMacro(guild: GuildId, name_raw: String, channel: ChannelBehavior): Macro? {
+    fun findMacro(guild: GuildId, name_raw: String, channel: MessageChannelBehavior): Macro? {
         val name = name_raw.toLowerCase()
         val channelId = channel.id.asString
         val macro = store.findAlias(guild, name, channelId) { it }
@@ -406,7 +405,7 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
 
         val logChannelId = configuration[guildId]?.logChannel ?: return@on
 
-        guild.getChannelOf<TextChannel>(logChannelId.toSnowflake())
+        guild.getChannelOf<GuildMessageChannel>(logChannelId.toSnowflake())
                 .createMessage("${member.username} :: ${member.id.value} " +
                         "invoked $macroName in ${message.channel.mention}")
     }
