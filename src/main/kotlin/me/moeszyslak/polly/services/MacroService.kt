@@ -1,19 +1,20 @@
 package me.moeszyslak.polly.services
 
-import com.gitlab.kordlib.common.entity.Snowflake
-import com.gitlab.kordlib.core.behavior.channel.MessageChannelBehavior
-import com.gitlab.kordlib.core.behavior.getChannelOf
-import com.gitlab.kordlib.core.entity.Guild
-import com.gitlab.kordlib.core.entity.channel.TextChannel
-import com.gitlab.kordlib.core.event.message.MessageCreateEvent
-import com.gitlab.kordlib.kordx.emoji.Emojis
-import com.gitlab.kordlib.kordx.emoji.toReaction
+import dev.kord.common.entity.Snowflake
+import dev.kord.common.kColor
+import dev.kord.core.behavior.channel.MessageChannelBehavior
+import dev.kord.core.behavior.getChannelOf
+import dev.kord.core.entity.Guild
+import dev.kord.core.entity.channel.GuildMessageChannel
+import dev.kord.core.event.message.MessageCreateEvent
+import dev.kord.x.emoji.Emojis
+import dev.kord.x.emoji.toReaction
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.jakejmattson.discordkt.api.Discord
 import me.jakejmattson.discordkt.api.annotations.Service
-import me.jakejmattson.discordkt.api.dsl.CommandEvent
-import me.jakejmattson.discordkt.api.dsl.GuildCommandEvent
+import me.jakejmattson.discordkt.api.commands.CommandEvent
+import me.jakejmattson.discordkt.api.commands.GuildCommandEvent
 import me.jakejmattson.discordkt.api.dsl.listeners
 import me.jakejmattson.discordkt.api.extensions.toSnowflake
 import me.jakejmattson.discordkt.api.extensions.toSnowflakeOrNull
@@ -27,8 +28,8 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
     private val allCommands
         get() = discord.commands.map { it.names }.flatten().map { it.toLowerCase() }
 
-    suspend fun macroInfo(event: GuildCommandEvent<*>, guild: GuildId, name_raw: String, channel: TextChannel?) {
-        val channelId = channel?.id?.value ?: ""
+    suspend fun macroInfo(event: GuildCommandEvent<*>, guild: GuildId, name_raw: String, channel: GuildMessageChannel?) {
+        val channelId = channel?.id?.asString ?: ""
         val name = name_raw.toLowerCase()
 
         val parent = store.findAlias(guild, name, channelId) { it } ?: run {
@@ -38,7 +39,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
 
         event.respond {
             title = "Macro - $name"
-            color = discord.configuration.theme
+            color = discord.configuration.theme?.kColor
             description = "```${parent.contents}```"
             field {
                 this.name = "Macro Name"
@@ -69,8 +70,8 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    fun addMacro(guild: GuildId, nameRaw: String, categoryRaw: String, channel: TextChannel?, contents: String): String {
-        val channelId = channel?.id?.value ?: ""
+    fun addMacro(guild: GuildId, nameRaw: String, categoryRaw: String, channel: GuildMessageChannel?, contents: String): String {
+        val channelId = channel?.id?.asString ?: ""
         val name = nameRaw.toLowerCase()
         val category = categoryRaw.toLowerCase()
 
@@ -90,7 +91,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    fun removeMacro(guild: GuildId, name_raw: String, channel: TextChannel?): String {
+    fun removeMacro(guild: GuildId, name_raw: String, channel: GuildMessageChannel?): String {
         val channelId = channel?.id?.value ?: ""
         val name = name_raw.toLowerCase()
 
@@ -105,7 +106,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    fun editMacro(guild: GuildId, name_raw: String, channel: TextChannel?, contents: String): String {
+    fun editMacro(guild: GuildId, name_raw: String, channel: GuildMessageChannel?, contents: String): String {
         val channelId = channel?.id?.value ?: ""
         val name = name_raw.toLowerCase()
 
@@ -125,7 +126,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    fun editMacroCategory(guild: GuildId, name_raw: String, channel: TextChannel?, category_raw: String): String {
+    fun editMacroCategory(guild: GuildId, name_raw: String, channel: GuildMessageChannel?, category_raw: String): String {
         val channelId = channel?.id?.value ?: ""
         val name = name_raw.toLowerCase()
         val category = category_raw.toLowerCase()
@@ -146,8 +147,8 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    fun addMacroAlias(guild: GuildId, name_raw: String, channel: TextChannel?, alias_raw: String): String {
-        val channelId = channel?.id?.value ?: ""
+    fun addMacroAlias(guild: GuildId, name_raw: String, channel: GuildMessageChannel?, alias_raw: String): String {
+        val channelId = channel?.id?.asString ?: ""
         val name = name_raw.toLowerCase()
         val alias = alias_raw.toLowerCase()
 
@@ -171,7 +172,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    fun removeMacroAlias(guild: GuildId, name_raw: String, channel: TextChannel?, alias_raw: String): String {
+    fun removeMacroAlias(guild: GuildId, name_raw: String, channel: GuildMessageChannel?, alias_raw: String): String {
         val channelId = channel?.id?.value ?: ""
         val name = name_raw.toLowerCase()
         val alias = alias_raw.toLowerCase()
@@ -194,7 +195,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    suspend fun listMacros(event: CommandEvent<*>, guild: GuildId, channel: TextChannel) = with(event) {
+    suspend fun listMacros(event: CommandEvent<*>, guild: GuildId, channel: GuildMessageChannel) = with(event) {
         val availableMacros = getMacrosAvailableIn(guild, channel)
                 .groupBy { it.category }
                 .toList()
@@ -206,7 +207,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
             chunks.map {
                 page {
                     title = "Macros available in ${channel.name}"
-                    color = discord.configuration.theme
+                    color = discord.configuration.theme?.kColor
 
                     if (it.isNotEmpty()) {
                         it.map { (category, macros) ->
@@ -225,7 +226,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
     }
 
     suspend fun listAllMacros(event: CommandEvent<*>, guild: Guild) {
-        val allMacros = store.forGuild(guild.id.longValue) { it }
+        val allMacros = store.forGuild(guild.id.value) { it }
                 .map { it.value }
                 .groupBy {
                     it.channel?.toSnowflakeOrNull()?.let { guild.getChannel(it).name } ?: "Global Macros"
@@ -238,7 +239,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
             chunks.map {
                 page {
                     title = "All available macros"
-                    color = event.discord.configuration.theme
+                    color = event.discord.configuration.theme?.kColor
 
                     if (it.isNotEmpty()) {
                         it.map { (channel, macros) ->
@@ -258,7 +259,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
     }
 
     suspend fun macroStats(event: CommandEvent<*>, guild: Guild, asc: Boolean) {
-        val allMacros = store.forGuild(guild.id.longValue) { it }
+        val allMacros = store.forGuild(guild.id.value) { it }
                 .map { it.value }
                 .groupBy {
                     it.channel?.toSnowflakeOrNull()?.let { guild.getChannel(it).name } ?: "Global Macros"
@@ -276,7 +277,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
             chunks.map {
                 page {
                     title = if (asc) "Least used macros" else "Top Used Macros"
-                    color = event.discord.configuration.theme
+                    color = event.discord.configuration.theme?.kColor
                     if (it.isNotEmpty()) {
                         it.map { (channel, macros) ->
                             field {
@@ -295,7 +296,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
 
     }
 
-    suspend fun searchMacro(event: CommandEvent<*>, query: String, channel: TextChannel, guild: GuildId) {
+    suspend fun searchMacro(event: CommandEvent<*>, query: String, channel: GuildMessageChannel, guild: GuildId) {
         val macros = getMacrosAvailableIn(guild, channel)
         val aliases = macros.flatMap { m -> m.aliases.toMutableList().also { it.add(m.name) } }
         val topNames = FuzzySearch.extractSorted(query, aliases, 70).take(5)
@@ -311,7 +312,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
 
         event.respond {
             title = "Search Results - '$query'"
-            color = event.discord.configuration.theme
+            color = event.discord.configuration.theme?.kColor
 
             field {
                 name = "Top Results - By names and aliases"
@@ -332,7 +333,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    private fun getMacrosAvailableIn(guild: GuildId, channel: TextChannel): List<Macro> {
+    private fun getMacrosAvailableIn(guild: GuildId, channel: GuildMessageChannel): List<Macro> {
         val macroList = store.forGuild(guild) { macros ->
             macros.filterValues { it.canRun(channel) }
         }
@@ -345,7 +346,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
 
     fun findMacro(guild: GuildId, name_raw: String, channel: MessageChannelBehavior): Macro? {
         val name = name_raw.toLowerCase()
-        val channelId = channel.id.value
+        val channelId = channel.id.asString
         val macro = store.findAlias(guild, name, channelId) { it }
                 ?: store.findAlias(guild, name, "") { it }
 
@@ -360,7 +361,7 @@ val macroCooldown = mutableListOf<Pair<Snowflake, Macro>>()
 fun macroListener(macroService: MacroService, configuration: Configuration) = listeners {
     on<MessageCreateEvent> {
         val guild = getGuild() ?: return@on
-        val guildId = guild.id.longValue
+        val guildId = guild.id.value
         val member = member ?: return@on
         if (member.isIgnored(configuration)) {
             return@on
@@ -404,9 +405,8 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
 
         val logChannelId = configuration[guildId]?.logChannel ?: return@on
 
-        guild.getChannelOf<TextChannel>(logChannelId.toSnowflake())
+        guild.getChannelOf<GuildMessageChannel>(logChannelId.toSnowflake())
                 .createMessage("${member.username} :: ${member.id.value} " +
                         "invoked $macroName in ${message.channel.mention}")
-
     }
 }

@@ -1,5 +1,6 @@
 package me.moeszyslak.polly.preconditions
 
+import me.jakejmattson.discordkt.api.commands.Command
 import me.jakejmattson.discordkt.api.dsl.*
 import me.moeszyslak.polly.data.Configuration
 
@@ -8,7 +9,7 @@ fun setupPrecondition(configuration: Configuration) = precondition {
     val command: Command = command ?: return@precondition
 
     if (!command.names.contains("Setup")) {
-        if (!configuration.hasGuildConfig(guild.id.longValue))
+        if (!configuration.hasGuildConfig(guild.id.value))
             fail("You must first use the `Setup` command in this guild.")
     }
 }

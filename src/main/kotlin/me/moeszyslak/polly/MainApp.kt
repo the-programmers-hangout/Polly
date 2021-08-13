@@ -1,15 +1,15 @@
 package me.moeszyslak.polly
 
-import com.gitlab.kordlib.gateway.Intent
-import com.gitlab.kordlib.gateway.Intents
-import com.gitlab.kordlib.gateway.PrivilegedIntent
-import com.gitlab.kordlib.kordx.emoji.Emojis
+import dev.kord.common.kColor
+import dev.kord.gateway.Intent
+import dev.kord.gateway.Intents
+import dev.kord.gateway.PrivilegedIntent
+import dev.kord.x.emoji.Emojis
 import me.jakejmattson.discordkt.api.dsl.bot
 import me.jakejmattson.discordkt.api.extensions.toSnowflake
 import me.moeszyslak.polly.data.Configuration
 import me.moeszyslak.polly.data.MacroStore
-import me.moeszyslak.polly.extensions.requiredPermissionLevel
-import me.moeszyslak.polly.services.PermissionsService
+import me.moeszyslak.polly.data.Permissions
 import me.moeszyslak.polly.services.StatisticsService
 import java.awt.Color
 import kotlin.time.ExperimentalTime
@@ -24,7 +24,7 @@ suspend fun main() {
     bot(token) {
         prefix {
             val configuration = discord.getInjectionObjects(Configuration::class)
-            guild?.let { configuration[it.id.longValue]?.prefix } ?: prefix
+            guild?.let { configuration[it.id.value]?.prefix } ?: prefix
         }
 
         configure {
@@ -34,15 +34,17 @@ suspend fun main() {
             commandReaction = Emojis.eyes
             theme = Color(0x00BFFF)
             recommendCommands = false
+            permissions(Permissions.NONE)
+            intents = Intents.nonPrivileged.plus(Intent.GuildMembers)
         }
 
         mentionEmbed {
             title = "Polly"
             description = "A simple, elegant macro bot"
-            color = it.discord.configuration.theme
+            color = it.discord.configuration.theme?.kColor
 
             thumbnail {
-                url = it.discord.api.getSelf().avatar.url
+                url = it.discord.kord.getSelf().avatar.url
             }
 
             field {
@@ -59,7 +61,7 @@ suspend fun main() {
             }
 
             val configuration = it.discord.getInjectionObjects(Configuration::class)
-            val guildConfiguration = configuration[it.guild!!.id.longValue]
+            val guildConfiguration = configuration[it.guild!!.id.value]
 
             if (guildConfiguration != null) {
                 val staffRole = it.guild!!.getRole(guildConfiguration.staffRole.toSnowflake())
@@ -82,7 +84,7 @@ suspend fun main() {
 
                 name = "Bot Info"
                 value = "```" +
-                        "Version: 1.3.0\n" +
+                        "Version: 1.4.0\n" +
                         "DiscordKt: ${versions.library}\n" +
                         "Kord: ${versions.kord}\n" +
                         "Kotlin: ${versions.kotlin}" +
@@ -100,27 +102,6 @@ suspend fun main() {
                 value = "[GitHub](https://github.com/the-programmers-hangout/Polly)"
                 inline = true
             }
-        }
-
-        intents {
-            Intents.nonPrivileged.intents.forEach {
-                +it
-            }
-
-            +Intent.GuildMembers
-        }
-
-        permissions {
-            val requiredPermissionLevel = command.requiredPermissionLevel
-            val guild = guild ?: return@permissions false
-            val member = user.asMember(guild.id)
-
-            val permissionsService = discord.getInjectionObjects(PermissionsService::class)
-
-            if (!permissionsService.hasClearance(member, requiredPermissionLevel))
-                return@permissions false
-
-            return@permissions true
         }
 
         onStart {

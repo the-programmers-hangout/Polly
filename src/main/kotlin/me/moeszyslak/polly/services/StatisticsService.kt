@@ -17,6 +17,6 @@ class StatisticsService(private val configuration: Configuration, private val di
 
 
     val ping: String
-        get() = "${discord.api.gateway.averagePing.inMilliseconds.toInt()} ms"
+        get() = "${discord.kord.gateway.averagePing}"
 
 }

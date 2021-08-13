@@ -1,8 +1,7 @@
 package me.moeszyslak.polly.data
 
-import com.gitlab.kordlib.core.entity.Guild
-import com.gitlab.kordlib.core.entity.Role
-import com.gitlab.kordlib.core.entity.channel.Channel
+import dev.kord.core.entity.Role
+import dev.kord.core.entity.channel.Channel
 import me.jakejmattson.discordkt.api.dsl.Data
 
 typealias GuildId = Long
@@ -18,9 +17,9 @@ data class Configuration(
         if (guildConfigurations[guildId] != null) return
 
         val newConfiguration = GuildConfiguration(
-                logChannel.id.longValue,
+                logChannel.id.value,
                 prefix,
-                staffRole.id.longValue,
+                staffRole.id.value,
                 cooldown,
                 mutableSetOf()
         )
