@@ -3,7 +3,6 @@ package me.moeszyslak.polly.services
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.kColor
 import dev.kord.core.behavior.channel.ChannelBehavior
-import dev.kord.core.behavior.channel.MessageChannelBehavior
 import dev.kord.core.behavior.getChannelOf
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.Channel
@@ -15,8 +14,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.jakejmattson.discordkt.api.Discord
 import me.jakejmattson.discordkt.api.annotations.Service
-import me.jakejmattson.discordkt.api.dsl.CommandEvent
-import me.jakejmattson.discordkt.api.dsl.GuildCommandEvent
+import me.jakejmattson.discordkt.api.commands.CommandEvent
+import me.jakejmattson.discordkt.api.commands.GuildCommandEvent
 import me.jakejmattson.discordkt.api.dsl.listeners
 import me.jakejmattson.discordkt.api.extensions.toSnowflake
 import me.jakejmattson.discordkt.api.extensions.toSnowflakeOrNull
@@ -403,12 +402,12 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
         }
 
 
-//        message.channel.createMessage(macro.contents)
+        message.channel.createMessage(macro.contents)
 
         val logChannelId = configuration[guildId]?.logChannel ?: return@on
 
-//        guild.getChannelOf<TextChannel>(logChannelId.toSnowflake())
-//                .createMessage("${member.username} :: ${member.id.value} " +
-//                        "invoked $macroName in ${message.channel.mention}")
+        guild.getChannelOf<TextChannel>(logChannelId.toSnowflake())
+                .createMessage("${member.username} :: ${member.id.value} " +
+                        "invoked $macroName in ${message.channel.mention}")
     }
 }

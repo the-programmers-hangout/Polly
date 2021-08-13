@@ -5,7 +5,7 @@ import dev.kord.common.kColor
 import dev.kord.core.entity.Member
 import me.jakejmattson.discordkt.api.arguments.ChoiceArg
 import me.jakejmattson.discordkt.api.arguments.UserArg
-import me.jakejmattson.discordkt.api.dsl.commands
+import me.jakejmattson.discordkt.api.commands.commands
 import me.moeszyslak.polly.data.Configuration
 import me.moeszyslak.polly.data.Permissions
 import java.awt.Color
