@@ -2,6 +2,7 @@ package me.moeszyslak.polly.services
 
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.MessageChannelBehavior
+import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.behavior.getChannelOf
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.GuildMessageChannel
@@ -15,6 +16,8 @@ import me.jakejmattson.discordkt.annotations.Service
 import me.jakejmattson.discordkt.commands.CommandEvent
 import me.jakejmattson.discordkt.commands.GuildCommandEvent
 import me.jakejmattson.discordkt.dsl.listeners
+import me.jakejmattson.discordkt.extensions.jumpLink
+import me.jakejmattson.discordkt.extensions.pfpUrl
 import me.jakejmattson.discordkt.extensions.toSnowflakeOrNull
 import me.moeszyslak.polly.commands.isIgnored
 import me.moeszyslak.polly.data.*
@@ -22,7 +25,7 @@ import me.xdrop.fuzzywuzzy.FuzzySearch
 
 
 @Service
-class MacroService(private val store: MacroStore, private val discord: Discord) {
+class MacroService(private val store: MacroStore, private val discord: Discord, private val configuration: Configuration) {
     private val allCommands
         get() = discord.commands.map { it.names }.flatten().map { it.toLowerCase() }
 
@@ -68,7 +71,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
-    fun addMacro(guild: GuildId, nameRaw: String, categoryRaw: String, channel: GuildMessageChannel?, contents: String): String {
+    fun addMacro(guild: GuildId, nameRaw: String, categoryRaw: String, channel: GuildMessageChannel?, contents: String, tracked: Boolean = false): String {
         val channelId = channel?.id?.asString ?: ""
         val name = nameRaw.toLowerCase()
         val category = categoryRaw.toLowerCase()
@@ -79,7 +82,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         if (alias != null) return "A macro or alias with that name already exists."
 
         val result = store.forGuild(guild) {
-            it.putIfAbsent("$name#$channelId", newMacro(name, contents, channelId, category))
+            it.putIfAbsent("$name#$channelId", newMacro(name, contents, channelId, category, tracked))
         }
 
         return if (result == null) {
@@ -124,6 +127,29 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
         }
     }
 
+    suspend fun toggleTrackingForExistingMacro(guild: Guild, name_raw: String, channel: GuildMessageChannel?, tracking: Boolean): String {
+        val channelId = channel?.id?.value ?: ""
+        val name = name_raw.toLowerCase()
+
+        val macro = store.forGuild(guild.id.value) { macros ->
+            macros["$name#$channelId"]?.let {
+                it.tracked = tracking
+                return@forGuild it
+            }
+            return@forGuild null
+        }
+
+        return if (macro != null && tracking) {
+            val names = macro.displayNames()
+            "Success. Macro `$names` will now post an alert to ${guild.getChannel(Snowflake(configuration[guild.id.value]!!.alertChannel)).mention}"
+        } else if (macro != null && !tracking) {
+            val names = macro.displayNames()
+            "Success. Macro `$names` will no longer post an alert to ${guild.getChannel(Snowflake(configuration[guild.id.value]!!.alertChannel)).mention}"
+        } else {
+            "Cannot find a macro by that name. If it is a channel specific macro you need to provide the channel as well."
+        }
+    }
+
     fun editMacroCategory(guild: GuildId, name_raw: String, channel: GuildMessageChannel?, category_raw: String): String {
         val channelId = channel?.id?.value ?: ""
         val name = name_raw.toLowerCase()
@@ -136,6 +162,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
             }
             return@forGuild null
         }
+        store.save()
 
         return if (macro != null) {
             val names = macro.displayNames()
@@ -399,12 +426,30 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
         }
 
 
-        message.channel.createMessage(macro.contents)
+        val macroMessage = message.channel.createMessage(macro.contents)
 
         val logChannelId = configuration[guildId]?.logChannel ?: return@on
 
         guild.getChannelOf<GuildMessageChannel>(Snowflake(logChannelId))
                 .createMessage("${member.username} :: ${member.id.value} " +
                         "invoked $macroName in ${message.channel.mention}")
+
+        if (guildConfiguration.trackedMacrosEnabled && macro.tracked) {
+            val alertChannelId = configuration[guildId]?.alertChannel ?: return@on
+
+            guild.getChannelOf<GuildMessageChannel>(Snowflake(alertChannelId))
+                .createEmbed {
+                    title = "Tracked Macro Invoked"
+                    color = discord.configuration.theme
+                    description = """
+                        **${macro.name}** invoked in ${message.channel.mention}. 
+                        Staff action may be needed [here](${macroMessage.jumpLink()}).
+                    """.trimIndent()
+                    footer {
+                        icon = member.pfpUrl
+                        text = "Invoked by ${member.tag} :: ${member.id.value}"
+                    }
+                }
+        }
     }
 }

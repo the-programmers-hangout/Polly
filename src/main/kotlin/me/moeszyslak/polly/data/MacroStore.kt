@@ -59,6 +59,7 @@ data class Macro(
         var contents: String,
         val channel: String?,
         var category: String,
+        var tracked: Boolean = false,
         var uses: Int = 0
 ) {
     fun channel() = channel ?: ""
@@ -72,6 +73,6 @@ data class Macro(
                     .joinToString(" | ")
 }
 
-fun newMacro(name: String, contents: String, channel: String, category: String): Macro {
-    return Macro(name, mutableListOf(), contents, channel, category)
+fun newMacro(name: String, contents: String, channel: String, category: String, tracked: Boolean = false): Macro {
+    return Macro(name, mutableListOf(), contents, channel, category, tracked)
 }

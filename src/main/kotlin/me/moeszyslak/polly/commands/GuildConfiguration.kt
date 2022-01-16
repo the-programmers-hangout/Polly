@@ -1,9 +1,6 @@
 package me.moeszyslak.polly.commands
 
-import me.jakejmattson.discordkt.arguments.AnyArg
-import me.jakejmattson.discordkt.arguments.ChannelArg
-import me.jakejmattson.discordkt.arguments.RoleArg
-import me.jakejmattson.discordkt.arguments.TimeArg
+import me.jakejmattson.discordkt.arguments.*
 import me.jakejmattson.discordkt.commands.commands
 import me.moeszyslak.polly.conversations.configurationConversation
 import me.moeszyslak.polly.data.Configuration
@@ -61,10 +58,24 @@ fun guildConfigurationCommands(configuration: Configuration) = commands("Basics"
             val logChannel = args.first
             val config = configuration[guild.id.value] ?: return@execute
 
-            config.staffRole = logChannel.id.value
+            config.logChannel = logChannel.id.value
             configuration.save()
 
             respond("Log channel set to ${logChannel.name}")
+        }
+    }
+
+    command("AlertChannel") {
+        description = "Set the channel where alerts will be output."
+        requiredPermission = Permissions.STAFF
+        execute(ChannelArg) {
+            val alertChannel = args.first
+            val config = configuration[guild.id.value] ?: return@execute
+
+            config.alertChannel = alertChannel.id.value
+            configuration.save()
+
+            respond("Alert channel set to ${alertChannel.name}")
         }
     }
 
@@ -79,6 +90,20 @@ fun guildConfigurationCommands(configuration: Configuration) = commands("Basics"
             configuration.save()
 
             respond("Macro cooldown set to ${timeToString(cooldown.toLong() * 1000)}")
+        }
+    }
+
+    command("TrackedMacros") {
+        description = "Toggle tracked macros (macros that post to the alert channel)"
+        requiredPermission = Permissions.STAFF
+        execute(BooleanArg("Enabled", "enable", "disable")) {
+            val enabled = args.first
+            val config = configuration[guild.id.value] ?: return@execute
+
+            config.trackedMacrosEnabled = enabled
+            configuration.save()
+
+            respond("Logging of tracked macros is now ${if(enabled) "**enabled**" else "**disabled**"}")
         }
     }
 }

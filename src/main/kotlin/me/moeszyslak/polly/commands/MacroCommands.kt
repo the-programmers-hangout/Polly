@@ -46,6 +46,34 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
+    command("AddTrackedMacro") {
+        description = "Adds a tracked macro (for all channels)"
+        requiredPermission = Permissions.STAFF
+
+        execute(AnyArg("Name"),
+            AnyArg("Category"),
+            EveryArg("Contents")) {
+            val (name, category, contents) = args
+
+            respond(macroService.addMacro(guild.id.value, name, category, null, contents, true))
+        }
+    }
+
+    command("Track") {
+        description = "Converts an existing macro to a tracked (alert) macro"
+        requiredPermission = Permissions.STAFF
+        execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
+            respond(macroService.toggleTrackingForExistingMacro(guild, args.first, args.second, true))
+        }
+    }
+
+    command("Untrack") {
+        description = "Removes tracking from an existing macro"
+        execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
+            respond(macroService.toggleTrackingForExistingMacro(guild, args.first, args.second, false))
+        }
+    }
+
     command("RemoveMacro") {
         description = "Removes a macro"
         requiredPermission = Permissions.STAFF
