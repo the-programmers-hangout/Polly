@@ -1,7 +1,7 @@
 package me.moeszyslak.polly.conversations
 
-import me.jakejmattson.discordkt.api.arguments.*
-import me.jakejmattson.discordkt.api.conversations.conversation
+import me.jakejmattson.discordkt.arguments.*
+import me.jakejmattson.discordkt.conversations.conversation
 import me.moeszyslak.polly.data.Configuration
 import me.moeszyslak.polly.data.GuildId
 

@@ -2,13 +2,15 @@ package me.moeszyslak.polly.data
 
 import dev.kord.core.entity.Role
 import dev.kord.core.entity.channel.Channel
-import me.jakejmattson.discordkt.api.dsl.Data
+import kotlinx.serialization.Serializable
+import me.jakejmattson.discordkt.dsl.Data
 
-typealias GuildId = Long
+typealias GuildId = ULong
 
+@Serializable
 data class Configuration(
         val botOwner: Long = 345541952500006912,
-        val guildConfigurations: MutableMap<GuildId, GuildConfiguration> = mutableMapOf()) : Data("config/config.json") {
+        val guildConfigurations: MutableMap<GuildId, GuildConfiguration> = mutableMapOf()) : Data() {
 
     operator fun get(id: GuildId) = guildConfigurations[id]
     fun hasGuildConfig(guildId: GuildId) = guildConfigurations.containsKey(guildId)
@@ -29,10 +31,11 @@ data class Configuration(
     }
 }
 
+@Serializable
 data class GuildConfiguration(
-        var logChannel: Long,
+        var logChannel: ULong,
         var prefix: String,
-        var staffRole: Long,
+        var staffRole: ULong,
         var channelCooldown: Double,
-        var ignoredUsers: MutableSet<Long>
+        var ignoredUsers: MutableSet<ULong>
 )

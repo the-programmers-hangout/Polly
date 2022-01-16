@@ -1,12 +1,12 @@
 package me.moeszyslak.polly
 
-import dev.kord.common.kColor
+import dev.kord.common.entity.Snowflake
 import dev.kord.gateway.Intent
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
 import dev.kord.x.emoji.Emojis
-import me.jakejmattson.discordkt.api.dsl.bot
-import me.jakejmattson.discordkt.api.extensions.toSnowflake
+import me.jakejmattson.discordkt.dsl.bot
+import me.jakejmattson.discordkt.extensions.pfpUrl
 import me.moeszyslak.polly.data.Configuration
 import me.moeszyslak.polly.data.MacroStore
 import me.moeszyslak.polly.data.Permissions
@@ -22,6 +22,9 @@ suspend fun main() {
     require(token != null) { "Expected the bot token as an environment variable" }
 
     bot(token) {
+        val configuration = data("config/config.json") { Configuration() }
+        val macros = data("config/macros.json") { MacroStore() }
+
         prefix {
             val configuration = discord.getInjectionObjects(Configuration::class)
             guild?.let { configuration[it.id.value]?.prefix } ?: prefix
@@ -41,10 +44,10 @@ suspend fun main() {
         mentionEmbed {
             title = "Polly"
             description = "A simple, elegant macro bot"
-            color = it.discord.configuration.theme?.kColor
+            color = it.discord.configuration.theme
 
             thumbnail {
-                url = it.discord.kord.getSelf().avatar.url
+                url = it.discord.kord.getSelf().pfpUrl
             }
 
             field {
@@ -64,8 +67,8 @@ suspend fun main() {
             val guildConfiguration = configuration[it.guild!!.id.value]
 
             if (guildConfiguration != null) {
-                val staffRole = it.guild!!.getRole(guildConfiguration.staffRole.toSnowflake())
-                val loggingChannel = it.guild!!.getChannel(guildConfiguration.logChannel.toSnowflake())
+                val staffRole = it.guild!!.getRole(Snowflake(guildConfiguration.staffRole))
+                val loggingChannel = it.guild!!.getChannel(Snowflake(guildConfiguration.logChannel))
                 val cooldown = guildConfiguration.channelCooldown
 
                 field {

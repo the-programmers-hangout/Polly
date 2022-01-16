@@ -1,10 +1,12 @@
 package me.moeszyslak.polly.data
 
 import dev.kord.core.entity.channel.GuildMessageChannel
-import me.jakejmattson.discordkt.api.dsl.Data
+import kotlinx.serialization.Serializable
+import me.jakejmattson.discordkt.dsl.Data
 
+@Serializable
 data class MacroStore(
-        val macros: MutableMap<GuildId, MutableMap<String, Macro>> = mutableMapOf()) : Data("config/macros.json", killIfGenerated = false) {
+        val macros: MutableMap<GuildId, MutableMap<String, Macro>> = mutableMapOf()) : Data() {
     @Transient
     var aliases: MutableMap<GuildId, Map<String, String>> = mutableMapOf()
 
@@ -50,6 +52,7 @@ data class MacroStore(
     }
 }
 
+@Serializable
 data class Macro(
         val name: String,
         var aliases: MutableList<String> = mutableListOf(),

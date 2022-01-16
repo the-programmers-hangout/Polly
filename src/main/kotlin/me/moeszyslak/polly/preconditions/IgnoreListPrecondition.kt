@@ -1,6 +1,6 @@
 package me.moeszyslak.polly.preconditions
 
-import me.jakejmattson.discordkt.api.dsl.*
+import me.jakejmattson.discordkt.dsl.*
 import me.moeszyslak.polly.commands.isIgnored
 import me.moeszyslak.polly.data.Configuration
 

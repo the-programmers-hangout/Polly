@@ -1,7 +1,6 @@
 package me.moeszyslak.polly.services
 
 import dev.kord.common.entity.Snowflake
-import dev.kord.common.kColor
 import dev.kord.core.behavior.channel.MessageChannelBehavior
 import dev.kord.core.behavior.getChannelOf
 import dev.kord.core.entity.Guild
@@ -11,13 +10,12 @@ import dev.kord.x.emoji.Emojis
 import dev.kord.x.emoji.toReaction
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.jakejmattson.discordkt.api.Discord
-import me.jakejmattson.discordkt.api.annotations.Service
-import me.jakejmattson.discordkt.api.commands.CommandEvent
-import me.jakejmattson.discordkt.api.commands.GuildCommandEvent
-import me.jakejmattson.discordkt.api.dsl.listeners
-import me.jakejmattson.discordkt.api.extensions.toSnowflake
-import me.jakejmattson.discordkt.api.extensions.toSnowflakeOrNull
+import me.jakejmattson.discordkt.Discord
+import me.jakejmattson.discordkt.annotations.Service
+import me.jakejmattson.discordkt.commands.CommandEvent
+import me.jakejmattson.discordkt.commands.GuildCommandEvent
+import me.jakejmattson.discordkt.dsl.listeners
+import me.jakejmattson.discordkt.extensions.toSnowflakeOrNull
 import me.moeszyslak.polly.commands.isIgnored
 import me.moeszyslak.polly.data.*
 import me.xdrop.fuzzywuzzy.FuzzySearch
@@ -39,7 +37,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
 
         event.respond {
             title = "Macro - $name"
-            color = discord.configuration.theme?.kColor
+            color = discord.configuration.theme
             description = "```${parent.contents}```"
             field {
                 this.name = "Macro Name"
@@ -207,7 +205,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
             chunks.map {
                 page {
                     title = "Macros available in ${channel.name}"
-                    color = discord.configuration.theme?.kColor
+                    color = discord.configuration.theme
 
                     if (it.isNotEmpty()) {
                         it.map { (category, macros) ->
@@ -239,7 +237,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
             chunks.map {
                 page {
                     title = "All available macros"
-                    color = event.discord.configuration.theme?.kColor
+                    color = event.discord.configuration.theme
 
                     if (it.isNotEmpty()) {
                         it.map { (channel, macros) ->
@@ -277,7 +275,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
             chunks.map {
                 page {
                     title = if (asc) "Least used macros" else "Top Used Macros"
-                    color = event.discord.configuration.theme?.kColor
+                    color = event.discord.configuration.theme
                     if (it.isNotEmpty()) {
                         it.map { (channel, macros) ->
                             field {
@@ -312,7 +310,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord) 
 
         event.respond {
             title = "Search Results - '$query'"
-            color = event.discord.configuration.theme?.kColor
+            color = event.discord.configuration.theme
 
             field {
                 name = "Top Results - By names and aliases"
@@ -405,7 +403,7 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
 
         val logChannelId = configuration[guildId]?.logChannel ?: return@on
 
-        guild.getChannelOf<GuildMessageChannel>(logChannelId.toSnowflake())
+        guild.getChannelOf<GuildMessageChannel>(Snowflake(logChannelId))
                 .createMessage("${member.username} :: ${member.id.value} " +
                         "invoked $macroName in ${message.channel.mention}")
     }

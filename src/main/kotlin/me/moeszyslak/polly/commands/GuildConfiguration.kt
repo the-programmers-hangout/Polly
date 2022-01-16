@@ -1,10 +1,10 @@
 package me.moeszyslak.polly.commands
 
-import me.jakejmattson.discordkt.api.arguments.AnyArg
-import me.jakejmattson.discordkt.api.arguments.ChannelArg
-import me.jakejmattson.discordkt.api.arguments.RoleArg
-import me.jakejmattson.discordkt.api.arguments.TimeArg
-import me.jakejmattson.discordkt.api.commands.commands
+import me.jakejmattson.discordkt.arguments.AnyArg
+import me.jakejmattson.discordkt.arguments.ChannelArg
+import me.jakejmattson.discordkt.arguments.RoleArg
+import me.jakejmattson.discordkt.arguments.TimeArg
+import me.jakejmattson.discordkt.commands.commands
 import me.moeszyslak.polly.conversations.configurationConversation
 import me.moeszyslak.polly.data.Configuration
 import me.moeszyslak.polly.data.Permissions
@@ -12,7 +12,7 @@ import me.moeszyslak.polly.utilities.timeToString
 
 fun guildConfigurationCommands(configuration: Configuration) = commands("Basics") {
 
-    guildCommand("Setup") {
+    command("Setup") {
         description = "Setup a guild to use Polly"
         requiredPermission = Permissions.GUILD_OWNER
         execute {
@@ -26,7 +26,7 @@ fun guildConfigurationCommands(configuration: Configuration) = commands("Basics"
         }
     }
 
-    guildCommand("Prefix") {
+    command("Prefix") {
         description = "Set the prefix required for the bot to register a command."
         requiredPermission = Permissions.STAFF
         execute(AnyArg("Prefix")) {
@@ -40,7 +40,7 @@ fun guildConfigurationCommands(configuration: Configuration) = commands("Basics"
         }
     }
 
-    guildCommand("StaffRole") {
+    command("StaffRole") {
         description = "Set the role required to use this bot."
         requiredPermission = Permissions.STAFF
         execute(RoleArg) {
@@ -54,7 +54,7 @@ fun guildConfigurationCommands(configuration: Configuration) = commands("Basics"
         }
     }
 
-    guildCommand("LogChannel") {
+    command("LogChannel") {
         description = "Set the channel where logs will be output."
         requiredPermission = Permissions.STAFF
         execute(ChannelArg) {
@@ -68,7 +68,7 @@ fun guildConfigurationCommands(configuration: Configuration) = commands("Basics"
         }
     }
 
-    guildCommand("Cooldown") {
+    command("Cooldown") {
         description = "Set the cooldown between macro invokes"
         requiredPermission = Permissions.STAFF
         execute(TimeArg) {

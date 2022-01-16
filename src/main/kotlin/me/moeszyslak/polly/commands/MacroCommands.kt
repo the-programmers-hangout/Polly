@@ -1,16 +1,16 @@
 package me.moeszyslak.polly.commands
 
 import dev.kord.core.entity.channel.GuildMessageChannel
-import me.jakejmattson.discordkt.api.arguments.AnyArg
-import me.jakejmattson.discordkt.api.arguments.ChannelArg
-import me.jakejmattson.discordkt.api.arguments.ChoiceArg
-import me.jakejmattson.discordkt.api.arguments.EveryArg
-import me.jakejmattson.discordkt.api.commands.commands
+import me.jakejmattson.discordkt.arguments.AnyArg
+import me.jakejmattson.discordkt.arguments.ChannelArg
+import me.jakejmattson.discordkt.arguments.ChoiceArg
+import me.jakejmattson.discordkt.arguments.EveryArg
+import me.jakejmattson.discordkt.commands.commands
 import me.moeszyslak.polly.data.Permissions
 import me.moeszyslak.polly.services.MacroService
 
 fun macroCommands(macroService: MacroService) = commands("Macros") {
-    guildCommand("MacroInfo") {
+    command("MacroInfo") {
         description = "Get Information for a macro"
         requiredPermission = Permissions.NONE
 
@@ -19,7 +19,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    guildCommand("AddMacro") {
+    command("AddMacro") {
         description = "Adds a macro (for all channels)"
         requiredPermission = Permissions.STAFF
 
@@ -32,7 +32,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    guildCommand("AddChannelMacro") {
+    command("AddChannelMacro") {
         description = "Adds a macro to a specific channel"
         requiredPermission = Permissions.STAFF
 
@@ -46,7 +46,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    guildCommand("RemoveMacro") {
+    command("RemoveMacro") {
         description = "Removes a macro"
         requiredPermission = Permissions.STAFF
         execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
@@ -54,7 +54,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    guildCommand("EditMacro") {
+    command("EditMacro") {
         description = "Edits the contents of a macro"
         requiredPermission = Permissions.STAFF
         execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable(), EveryArg("Contents")) {
@@ -62,7 +62,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    guildCommand("EditCategory") {
+    command("EditCategory") {
         description = "Edits the category of a macro"
         requiredPermission = Permissions.STAFF
         execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable(), AnyArg("New Category")) {
@@ -70,7 +70,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    guildCommand("AddAlias") {
+    command("AddAlias") {
         description = "Add an alias to a macro"
         requiredPermission = Permissions.STAFF
         execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable(), AnyArg("Alias")) {
@@ -78,7 +78,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    guildCommand("RemoveAlias") {
+    command("RemoveAlias") {
         description = "Remove an alias from a macro"
         requiredPermission = Permissions.STAFF
         execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable(), AnyArg("Alias")) {
@@ -86,7 +86,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    guildCommand("ListMacros") {
+    command("ListMacros") {
         description = "Lists all macros available in the given channel. If no channel is specified, defaults to the current channel."
         requiredPermission = Permissions.NONE
         execute(ChannelArg<GuildMessageChannel>("Channel").optional() { it.channel as GuildMessageChannel }) {
@@ -94,7 +94,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    guildCommand("ListAllMacros") {
+    command("ListAllMacros") {
         description = "Lists all macros available in the guild, grouped by channel."
         requiredPermission = Permissions.NONE
         execute {
@@ -102,7 +102,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    guildCommand("MacroStats") {
+    command("MacroStats") {
         description = "Get statistics on most and least used macros"
         requiredPermission = Permissions.NONE
         execute(ChoiceArg("asc/desc", "asc", "desc").optional("desc")) {
@@ -113,7 +113,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    guildCommand("SearchMacros") {
+    command("SearchMacros") {
        description = "Search the available macros available"
         requiredPermission = Permissions.NONE
         execute(EveryArg) {
