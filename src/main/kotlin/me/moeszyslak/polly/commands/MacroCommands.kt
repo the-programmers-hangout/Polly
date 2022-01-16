@@ -69,6 +69,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
 
     command("Untrack") {
         description = "Removes tracking from an existing macro"
+        requiredPermission = Permissions.STAFF
         execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
             respond(macroService.toggleTrackingForExistingMacro(guild, args.first, args.second, false))
         }
