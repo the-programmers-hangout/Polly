@@ -3,9 +3,9 @@ package me.moeszyslak.polly.commands
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.kColor
 import dev.kord.core.entity.Member
-import me.jakejmattson.discordkt.api.arguments.ChoiceArg
-import me.jakejmattson.discordkt.api.arguments.UserArg
-import me.jakejmattson.discordkt.api.commands.commands
+import me.jakejmattson.discordkt.arguments.ChoiceArg
+import me.jakejmattson.discordkt.arguments.UserArg
+import me.jakejmattson.discordkt.commands.commands
 import me.moeszyslak.polly.data.Configuration
 import me.moeszyslak.polly.data.Permissions
 import java.awt.Color
@@ -18,7 +18,7 @@ fun Member.isIgnored(configuration: Configuration): Boolean {
 
 fun ignoreListCommands(configuration: Configuration) = commands("IgnoreList") {
 
-    guildCommand("IgnoreList") {
+    command("IgnoreList") {
         description = "Show ignore list."
         requiredPermission = Permissions.STAFF
         execute {
@@ -42,7 +42,7 @@ fun ignoreListCommands(configuration: Configuration) = commands("IgnoreList") {
         }
     }
 
-    guildCommand("Ignore") {
+    command("Ignore") {
         description = "Add/remove users from the ignore list."
         requiredPermission = Permissions.STAFF
         execute(

@@ -1,7 +1,7 @@
 package me.moeszyslak.polly.services
 
-import me.jakejmattson.discordkt.api.Discord
-import me.jakejmattson.discordkt.api.annotations.Service
+import me.jakejmattson.discordkt.Discord
+import me.jakejmattson.discordkt.annotations.Service
 import me.moeszyslak.polly.data.Configuration
 import me.moeszyslak.polly.utilities.timeToString
 import java.util.*
