@@ -1,29 +1,22 @@
 package me.moeszyslak.polly.data
 
-import dev.kord.core.any
-import me.jakejmattson.discordkt.dsl.PermissionContext
+import dev.kord.common.entity.Snowflake
+import me.jakejmattson.discordkt.dsl.Permission
 import me.jakejmattson.discordkt.dsl.PermissionSet
+import me.jakejmattson.discordkt.dsl.permission
+import me.jakejmattson.discordkt.extensions.toSnowflake
 
 @Suppress("unused")
-enum class Permissions : PermissionSet {
-    BOT_OWNER {
-        override suspend fun hasPermission(context: PermissionContext) =
-            context.discord.getInjectionObjects<Configuration>().botOwner == context.user.id.value.toLong()
-    },
-    GUILD_OWNER {
-        override suspend fun hasPermission(context: PermissionContext) =
-            context.getMember()?.isOwner() ?: false
 
-    },
-    STAFF {
-        override suspend fun hasPermission(context: PermissionContext): Boolean {
-            val guild = context.guild ?: return false
-            val member = context.user.asMember(guild.id)
-            val configuration = context.discord.getInjectionObjects<Configuration>()
-            return member.roles.any { it.id.value == configuration[guild.id.value]!!.staffRole }
+object Permissions : PermissionSet {
+    val BOT_OWNER = permission("Bot Owner") { users(discord.getInjectionObjects<Configuration>().botOwner.toSnowflake()) }
+    val GUILD_OWNER = permission("Guild Owner") { guild?.ownerId?.let { users(it) } }
+    val STAFF = permission("Staff") {
+        discord.getInjectionObjects<Configuration>()[guild!!.id.value]?.staffRole?.let {
+            roles(Snowflake(it))
         }
-    },
-    NONE {
-        override suspend fun hasPermission(context: PermissionContext) = true
     }
+    val NONE = permission("None") { guild?.everyoneRole?.let { roles(it.id) } }
+    override val hierarchy: List<Permission> = listOf(NONE, STAFF, GUILD_OWNER, BOT_OWNER)
+    override val commandDefault: Permission = STAFF
 }

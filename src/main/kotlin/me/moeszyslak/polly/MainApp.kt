@@ -37,7 +37,7 @@ suspend fun main() {
             commandReaction = Emojis.eyes
             theme = Color(0x00BFFF)
             recommendCommands = false
-            permissions(Permissions.NONE)
+            permissions = Permissions
             intents = Intents.nonPrivileged.plus(Intent.GuildMembers)
         }
 
