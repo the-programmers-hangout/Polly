@@ -37,7 +37,7 @@ suspend fun main() {
             commandReaction = Emojis.eyes
             theme = Color(0x00BFFF)
             recommendCommands = false
-            permissions(Permissions.NONE)
+            permissions = Permissions
             intents = Intents.nonPrivileged.plus(Intent.GuildMembers)
         }
 
@@ -87,7 +87,7 @@ suspend fun main() {
 
                 name = "Bot Info"
                 value = "```" +
-                        "Version: 1.4.0\n" +
+                        "Version: 1.4.1\n" +
                         "DiscordKt: ${versions.library}\n" +
                         "Kord: ${versions.kord}\n" +
                         "Kotlin: ${versions.kotlin}" +
