@@ -20,6 +20,15 @@ dependencies {
 tasks {
     compileKotlin {
         kotlinOptions.jvmTarget = "1.8"
+        dependsOn("writeProperties")
+    }
+
+    register<WriteProperties>("writeProperties") {
+        property("name", project.name)
+        property("description", project.description.toString())
+        property("version", version.toString())
+        property("url", "https://github.com/the-programmers-hangout/Polly")
+        setOutputFile("src/main/resources/bot.properties")
     }
 
     shadowJar {
