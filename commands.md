@@ -2,12 +2,12 @@
 
 ## Key 
 | Symbol      | Meaning                        |
-| ----------- | ------------------------------ |
+|-------------|--------------------------------|
 | [Argument]  | Argument is not required.      |
 
 ## Basics
 | Commands      | Arguments | Description                                                   |
-| ------------- | --------- | ------------------------------------------------------------- |
+|---------------|-----------|---------------------------------------------------------------|
 | AlertChannel  | Channel   | Set the channel where alerts will be output.                  |
 | Cooldown      | Time      | Set the cooldown between macro invokes                        |
 | LogChannel    | Channel   | Set the channel where logs will be output.                    |
@@ -18,13 +18,13 @@
 
 ## IgnoreList
 | Commands   | Arguments        | Description                            |
-| ---------- | ---------------- | -------------------------------------- |
+|------------|------------------|----------------------------------------|
 | Ignore     | add/remove, User | Add/remove users from the ignore list. |
 | IgnoreList |                  | Show ignore list.                      |
 
 ## Macros
 | Commands        | Arguments                         | Description                                                                                                   |
-| --------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+|-----------------|-----------------------------------|---------------------------------------------------------------------------------------------------------------|
 | AddAlias        | Name, [Channel], Alias            | Add an alias to a macro                                                                                       |
 | AddChannelMacro | Name, Category, Channel, Contents | Adds a macro to a specific channel                                                                            |
 | AddMacro        | Name, Category, Contents          | Adds a macro (for all channels)                                                                               |
@@ -43,6 +43,7 @@
 
 ## Utility
 | Commands | Arguments | Description          |
-| -------- | --------- | -------------------- |
+|----------|-----------|----------------------|
 | Help     | [Command] | Display a help menu. |
+| info     |           | Bot info for Polly   |
 
