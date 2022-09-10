@@ -1,7 +1,7 @@
 package me.moeszyslak.polly.preconditions
 
 import me.jakejmattson.discordkt.commands.Command
-import me.jakejmattson.discordkt.dsl.*
+import me.jakejmattson.discordkt.dsl.precondition
 import me.moeszyslak.polly.data.Configuration
 
 fun setupPrecondition(configuration: Configuration) = precondition {

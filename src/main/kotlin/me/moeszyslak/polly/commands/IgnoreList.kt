@@ -1,7 +1,5 @@
 package me.moeszyslak.polly.commands
 
-import dev.kord.common.entity.Permission
-import dev.kord.common.entity.Permissions
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.kColor
 import dev.kord.core.entity.Member
@@ -44,8 +42,8 @@ fun ignoreListCommands(configuration: Configuration) = commands("IgnoreList") {
     command("Ignore") {
         description = "Add/remove users from the ignore list."
         execute(
-                ChoiceArg("add/remove", "add", "remove"),
-                UserArg) {
+            ChoiceArg("add/remove", "add", "remove"),
+            UserArg) {
 
             val (choice, user) = args
             val config = configuration[guild.id.value] ?: return@execute

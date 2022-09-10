@@ -3,8 +3,6 @@ package me.moeszyslak.polly
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Permissions
-import dev.kord.gateway.Intent
-import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
 import dev.kord.x.emoji.Emojis
 import me.jakejmattson.discordkt.dsl.bot
@@ -21,7 +19,7 @@ fun main() {
 
     bot(token) {
         val configuration = data("config/config.json") { Configuration() }
-        val macros = data("config/macros.json") { MacroStore() }
+        data("config/macros.json") { MacroStore() }
 
         prefix {
             guild?.let { configuration[it.id.value]?.prefix } ?: prefix
@@ -31,6 +29,7 @@ fun main() {
             mentionAsPrefix = true
             documentCommands = true
             logStartup = true
+            dualRegistry = false
             commandReaction = Emojis.eyes
             theme = Color(0x00BFFF)
             recommendCommands = false

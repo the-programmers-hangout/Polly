@@ -8,7 +8,7 @@ import me.jakejmattson.discordkt.commands.commands
 import me.moeszyslak.polly.services.MacroService
 
 fun macroCommands(macroService: MacroService) = commands("Macros") {
-   command("AddMacro") {
+    command("AddMacro") {
         description = "Adds a macro (for all channels)"
         execute(AnyArg("Name"),
             AnyArg("Category"),
@@ -103,7 +103,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
     command("ListMacros") {
         description = "Lists all macros available in the given channel. If no channel is specified, defaults to the current channel."
         requiredPermissions = Permissions(Permission.UseApplicationCommands)
-        execute(ChannelArg<GuildMessageChannel>("Channel").optional() { it.channel as GuildMessageChannel }) {
+        execute(ChannelArg<GuildMessageChannel>("Channel").optional { it.channel as GuildMessageChannel }) {
             macroService.listMacros(this, guild.id.value, args.first)
         }
     }
@@ -120,7 +120,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         description = "Get statistics on most and least used macros"
         requiredPermissions = Permissions(Permission.UseApplicationCommands)
         execute(ChoiceArg("asc/desc", "asc", "desc").optional("desc")) {
-            when (args.first.toLowerCase()) {
+            when (args.first.lowercase()) {
                 "asc" -> macroService.macroStats(this, guild, true)
                 "desc" -> macroService.macroStats(this, guild, false)
             }

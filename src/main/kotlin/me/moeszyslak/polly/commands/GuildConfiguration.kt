@@ -97,7 +97,7 @@ fun guildConfigurationCommands(configuration: Configuration) = commands("Basics"
             config.trackedMacrosEnabled = enabled
             configuration.save()
 
-            respond("Logging of tracked macros is now ${if(enabled) "**enabled**" else "**disabled**"}")
+            respond("Logging of tracked macros is now ${if (enabled) "**enabled**" else "**disabled**"}")
         }
     }
 }

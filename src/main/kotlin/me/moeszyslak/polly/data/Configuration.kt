@@ -9,8 +9,8 @@ typealias GuildId = ULong
 
 @Serializable
 data class Configuration(
-        val botOwner: Long = 345541952500006912,
-        val guildConfigurations: MutableMap<GuildId, GuildConfiguration> = mutableMapOf()) : Data() {
+    val botOwner: Long = 345541952500006912,
+    val guildConfigurations: MutableMap<GuildId, GuildConfiguration> = mutableMapOf()) : Data() {
 
     operator fun get(id: GuildId) = guildConfigurations[id]
     fun hasGuildConfig(guildId: GuildId) = guildConfigurations.containsKey(guildId)
@@ -35,11 +35,11 @@ data class Configuration(
 
 @Serializable
 data class GuildConfiguration(
-        var logChannel: ULong,
-        var alertChannel: ULong,
-        var trackedMacrosEnabled: Boolean,
-        var prefix: String,
-        var staffRole: ULong,
-        var channelCooldown: Double,
-        var ignoredUsers: MutableSet<ULong>
+    var logChannel: ULong,
+    var alertChannel: ULong,
+    var trackedMacrosEnabled: Boolean,
+    var prefix: String,
+    var staffRole: ULong,
+    var channelCooldown: Double,
+    var ignoredUsers: MutableSet<ULong>
 )

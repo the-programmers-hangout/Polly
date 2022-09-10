@@ -2,11 +2,12 @@ package me.moeszyslak.polly.data
 
 import dev.kord.core.entity.channel.GuildMessageChannel
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import me.jakejmattson.discordkt.dsl.Data
 
 @Serializable
 data class MacroStore(
-        val macros: MutableMap<GuildId, MutableMap<String, Macro>> = mutableMapOf()) : Data() {
+    val macros: MutableMap<GuildId, MutableMap<String, Macro>> = mutableMapOf()) : Data() {
     @Transient
     var aliases: MutableMap<GuildId, Map<String, String>> = mutableMapOf()
 
@@ -54,23 +55,23 @@ data class MacroStore(
 
 @Serializable
 data class Macro(
-        val name: String,
-        var aliases: MutableList<String> = mutableListOf(),
-        var contents: String,
-        val channel: String?,
-        var category: String,
-        var tracked: Boolean = false,
-        var uses: Int = 0
+    val name: String,
+    var aliases: MutableList<String> = mutableListOf(),
+    var contents: String,
+    val channel: String?,
+    var category: String,
+    var tracked: Boolean = false,
+    var uses: Int = 0
 ) {
     fun channel() = channel ?: ""
 
     fun canRun(messageChannel: GuildMessageChannel) =
-            (channel == null || channel == "" || channel == messageChannel.id.asString)
+        (channel == null || channel == "" || channel == messageChannel.id.toString())
 
     fun displayNames() =
-            listOf(listOf(name), aliases)
-                    .flatten()
-                    .joinToString(" | ")
+        listOf(listOf(name), aliases)
+            .flatten()
+            .joinToString(" | ")
 }
 
 fun newMacro(name: String, contents: String, channel: String, category: String, tracked: Boolean = false): Macro {
