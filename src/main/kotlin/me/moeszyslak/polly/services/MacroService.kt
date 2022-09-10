@@ -9,6 +9,7 @@ import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.x.emoji.Emojis
 import dev.kord.x.emoji.toReaction
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.jakejmattson.discordkt.Discord
@@ -161,6 +162,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
             }
             return@forGuild null
         }
+
         store.save()
 
         return if (macro != null) {
@@ -411,7 +413,8 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
         }
 
         macroCooldown += message.channelId to macro
-        launch {
+
+        GlobalScope.launch {
             val cooldown = guildConfiguration.channelCooldown * 1000
             delay(cooldown.toLong())
             macroCooldown -= message.channelId to macro

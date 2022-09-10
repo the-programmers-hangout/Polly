@@ -6,6 +6,7 @@ import dev.kord.core.entity.Member
 import me.jakejmattson.discordkt.arguments.ChoiceArg
 import me.jakejmattson.discordkt.arguments.UserArg
 import me.jakejmattson.discordkt.commands.commands
+import me.jakejmattson.discordkt.dsl.edit
 import me.moeszyslak.polly.data.Configuration
 import java.awt.Color
 
@@ -16,7 +17,7 @@ fun Member.isIgnored(configuration: Configuration): Boolean {
 }
 
 fun ignoreListCommands(configuration: Configuration) = commands("IgnoreList") {
-    command("IgnoreList") {
+    text("IgnoreList") {
         description = "Show ignore list."
         execute {
             val config = configuration[guild.id.value] ?: return@execute
@@ -39,7 +40,7 @@ fun ignoreListCommands(configuration: Configuration) = commands("IgnoreList") {
         }
     }
 
-    command("Ignore") {
+    text("Ignore") {
         description = "Add/remove users from the ignore list."
         execute(
             ChoiceArg("add/remove", "add", "remove"),
@@ -55,9 +56,7 @@ fun ignoreListCommands(configuration: Configuration) = commands("IgnoreList") {
                         return@execute
                     }
 
-                    config.ignoredUsers.add(user.id.value)
-                    configuration.save()
-
+                    configuration.edit { config.ignoredUsers.add(user.id.value) }
                     respond("${user.username} added to the ignore list")
                 }
 
@@ -67,9 +66,7 @@ fun ignoreListCommands(configuration: Configuration) = commands("IgnoreList") {
                         return@execute
                     }
 
-                    config.ignoredUsers.remove(user.id.value)
-                    configuration.save()
-
+                    configuration.edit { config.ignoredUsers.remove(user.id.value) }
                     respond("${user.username} removed from the ignore list")
                 }
 

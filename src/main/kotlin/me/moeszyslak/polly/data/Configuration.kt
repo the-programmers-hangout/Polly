@@ -4,6 +4,7 @@ import dev.kord.core.entity.Role
 import dev.kord.core.entity.channel.Channel
 import kotlinx.serialization.Serializable
 import me.jakejmattson.discordkt.dsl.Data
+import me.jakejmattson.discordkt.dsl.edit
 
 typealias GuildId = ULong
 
@@ -28,8 +29,7 @@ data class Configuration(
             mutableSetOf()
         )
 
-        guildConfigurations[guildId] = newConfiguration
-        save()
+        edit { guildConfigurations[guildId] = newConfiguration }
     }
 }
 

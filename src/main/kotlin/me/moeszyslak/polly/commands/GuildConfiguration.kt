@@ -4,12 +4,13 @@ import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Permissions
 import me.jakejmattson.discordkt.arguments.*
 import me.jakejmattson.discordkt.commands.commands
+import me.jakejmattson.discordkt.dsl.edit
 import me.moeszyslak.polly.conversations.configurationConversation
 import me.moeszyslak.polly.data.Configuration
 import me.moeszyslak.polly.utilities.timeToString
 
 fun guildConfigurationCommands(configuration: Configuration) = commands("Basics") {
-    command("Setup") {
+    text("Setup") {
         description = "Setup a guild to use Polly"
         requiredPermissions = Permissions(Permission.ManageGuild)
         execute {
@@ -23,80 +24,68 @@ fun guildConfigurationCommands(configuration: Configuration) = commands("Basics"
         }
     }
 
-    command("Prefix") {
+    text("Prefix") {
         description = "Set the prefix required for the bot to register a command."
         execute(AnyArg("Prefix")) {
             val prefix = args.first
             val config = configuration[guild.id.value] ?: return@execute
 
-            config.prefix = prefix
-            configuration.save()
-
+            configuration.edit { config.prefix = prefix }
             respond("Prefix set to: $prefix")
         }
     }
 
-    command("StaffRole") {
+    text("StaffRole") {
         description = "Set the role required to use this bot."
         execute(RoleArg) {
             val requiredRole = args.first
             val config = configuration[guild.id.value] ?: return@execute
 
-            config.staffRole = requiredRole.id.value
-            configuration.save()
-
+            configuration.edit { config.staffRole = requiredRole.id.value }
             respond("Required role set to ${requiredRole.name}")
         }
     }
 
-    command("LogChannel") {
+    text("LogChannel") {
         description = "Set the channel where logs will be output."
         execute(ChannelArg) {
             val logChannel = args.first
             val config = configuration[guild.id.value] ?: return@execute
 
-            config.logChannel = logChannel.id.value
-            configuration.save()
-
+            configuration.edit { config.logChannel = logChannel.id.value }
             respond("Log channel set to ${logChannel.name}")
         }
     }
 
-    command("AlertChannel") {
+    text("AlertChannel") {
         description = "Set the channel where alerts will be output."
         execute(ChannelArg) {
             val alertChannel = args.first
             val config = configuration[guild.id.value] ?: return@execute
 
-            config.alertChannel = alertChannel.id.value
-            configuration.save()
-
+            configuration.edit { config.alertChannel = alertChannel.id.value }
             respond("Alert channel set to ${alertChannel.name}")
         }
     }
 
-    command("Cooldown") {
+    text("Cooldown") {
         description = "Set the cooldown between macro invokes"
         execute(TimeArg) {
             val cooldown = args.first
             val config = configuration[guild.id.value] ?: return@execute
 
-            config.channelCooldown = cooldown
-            configuration.save()
-
+            configuration.edit { config.channelCooldown = cooldown }
             respond("Macro cooldown set to ${timeToString(cooldown.toLong() * 1000)}")
         }
     }
 
-    command("TrackedMacros") {
+    text("TrackedMacros") {
         description = "Toggle tracked macros (macros that post to the alert channel)"
         execute(BooleanArg("Enabled", "enable", "disable")) {
             val enabled = args.first
             val config = configuration[guild.id.value] ?: return@execute
 
-            config.trackedMacrosEnabled = enabled
-            configuration.save()
-
+            configuration.edit { config.trackedMacrosEnabled = enabled }
             respond("Logging of tracked macros is now ${if (enabled) "**enabled**" else "**disabled**"}")
         }
     }

@@ -4,6 +4,7 @@ import dev.kord.core.entity.channel.GuildMessageChannel
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import me.jakejmattson.discordkt.dsl.Data
+import me.jakejmattson.discordkt.dsl.edit
 
 @Serializable
 data class MacroStore(
@@ -30,10 +31,7 @@ data class MacroStore(
         return fn(guildMacros).also { save(guildId) }
     }
 
-    private fun save(guildId: GuildId) {
-        populate(guildId)
-        save()
-    }
+    private fun save(guildId: GuildId) = edit { populate(guildId) }
 
     fun populate(guildId: GuildId? = null) {
         if (guildId == null) {
