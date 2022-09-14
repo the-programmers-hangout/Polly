@@ -12,11 +12,14 @@ import dev.kord.x.emoji.toReaction
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import me.jakejmattson.discordkt.Args2
 import me.jakejmattson.discordkt.Discord
 import me.jakejmattson.discordkt.annotations.Service
 import me.jakejmattson.discordkt.commands.CommandEvent
-import me.jakejmattson.discordkt.commands.GuildCommandEvent
+import me.jakejmattson.discordkt.commands.GuildSlashCommandEvent
+import me.jakejmattson.discordkt.commands.SlashCommandEvent
 import me.jakejmattson.discordkt.dsl.listeners
+import me.jakejmattson.discordkt.extensions.createMenu
 import me.jakejmattson.discordkt.extensions.jumpLink
 import me.jakejmattson.discordkt.extensions.pfpUrl
 import me.jakejmattson.discordkt.extensions.toSnowflakeOrNull
@@ -29,7 +32,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
     private val allCommands
         get() = discord.commands.map { it.names }.flatten().map { it.lowercase() }
 
-    suspend fun macroInfo(event: GuildCommandEvent<*>, guild: GuildId, name_raw: String, channel: GuildMessageChannel?) {
+    suspend fun macroInfo(event: GuildSlashCommandEvent<Args2<String, GuildMessageChannel?>>, guild: GuildId, name_raw: String, channel: GuildMessageChannel?) {
         val channelId = channel?.id?.toString() ?: ""
         val name = name_raw.lowercase()
 
@@ -227,8 +230,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
             .sortedByDescending { it.second.size }
 
         val chunks = availableMacros.chunked(25)
-
-        event.respondMenu {
+        event.channel.createMenu {
             chunks.map {
                 page {
                     title = "Macros available in ${channel.name}"
@@ -260,7 +262,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
             .sortedByDescending { it.second.size }
 
         val chunks = allMacros.chunked(1)
-        event.respondMenu {
+        event.channel.createMenu {
             chunks.map {
                 page {
                     title = "All available macros"
@@ -358,7 +360,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
         }
     }
 
-    private fun getMacrosAvailableIn(guild: GuildId, channel: GuildMessageChannel): List<Macro> {
+    fun getMacrosAvailableIn(guild: GuildId, channel: GuildMessageChannel): List<Macro> {
         val macroList = store.forGuild(guild) { macros ->
             macros.filterValues { it.canRun(channel) }
         }

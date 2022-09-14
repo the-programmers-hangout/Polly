@@ -1,53 +1,21 @@
 package me.moeszyslak.polly.commands
 
-import dev.kord.common.entity.Permission
-import dev.kord.common.entity.Permissions
 import me.jakejmattson.discordkt.arguments.*
 import me.jakejmattson.discordkt.commands.commands
 import me.jakejmattson.discordkt.dsl.edit
-import me.moeszyslak.polly.conversations.configurationConversation
 import me.moeszyslak.polly.data.Configuration
 import me.moeszyslak.polly.utilities.timeToString
 
 fun guildConfigurationCommands(configuration: Configuration) = commands("Basics") {
-    text("Setup") {
-        description = "Setup a guild to use Polly"
-        requiredPermissions = Permissions(Permission.ManageGuild)
-        execute {
-            if (configuration.hasGuildConfig(guild.id.value)) {
-                respond("Guild configuration already exists. You can use commands to modify the config")
-                return@execute
-            }
-
-            configurationConversation(guild.id.value, configuration).startPublicly(discord, author, channel)
-            respond("${guild.name} has been setup")
+    slash("Setup") {
+        execute(ChannelArg("LogChannel"), ChannelArg("AlertChannel"), TimeArg("Cooldown"), BooleanArg("TrackedMacros")) {
+            val (logChannel, alertChannel, cooldown, trackedMacros) = args
+            configuration.setup(guild.id.value, logChannel, alertChannel, cooldown, trackedMacros)
+            respondPublic("${guild.name} has been setup")
         }
     }
 
-    text("Prefix") {
-        description = "Set the prefix required for the bot to register a command."
-        execute(AnyArg("Prefix")) {
-            val prefix = args.first
-            val config = configuration[guild.id.value] ?: return@execute
-
-            configuration.edit { config.prefix = prefix }
-            respond("Prefix set to: $prefix")
-        }
-    }
-
-    text("StaffRole") {
-        description = "Set the role required to use this bot."
-        execute(RoleArg) {
-            val requiredRole = args.first
-            val config = configuration[guild.id.value] ?: return@execute
-
-            configuration.edit { config.staffRole = requiredRole.id.value }
-            respond("Required role set to ${requiredRole.name}")
-        }
-    }
-
-    text("LogChannel") {
-        description = "Set the channel where logs will be output."
+    slash("LogChannel", "Set the channel where logs will be output.") {
         execute(ChannelArg) {
             val logChannel = args.first
             val config = configuration[guild.id.value] ?: return@execute
@@ -57,8 +25,7 @@ fun guildConfigurationCommands(configuration: Configuration) = commands("Basics"
         }
     }
 
-    text("AlertChannel") {
-        description = "Set the channel where alerts will be output."
+    slash("AlertChannel", "Set the channel where alerts will be output.") {
         execute(ChannelArg) {
             val alertChannel = args.first
             val config = configuration[guild.id.value] ?: return@execute
@@ -68,8 +35,18 @@ fun guildConfigurationCommands(configuration: Configuration) = commands("Basics"
         }
     }
 
-    text("Cooldown") {
-        description = "Set the cooldown between macro invokes"
+    slash("Prefix", "Set the prefix required legacy macro invocations.") {
+        execute(AnyArg("Prefix")) {
+            val prefix = args.first
+            val config = configuration[guild.id.value] ?: return@execute
+
+            configuration.edit { config.prefix = prefix }
+            respond("Prefix set to: $prefix")
+        }
+    }
+
+
+    slash("Cooldown", "Set the cooldown between macro invokes") {
         execute(TimeArg) {
             val cooldown = args.first
             val config = configuration[guild.id.value] ?: return@execute
@@ -79,8 +56,7 @@ fun guildConfigurationCommands(configuration: Configuration) = commands("Basics"
         }
     }
 
-    text("TrackedMacros") {
-        description = "Toggle tracked macros (macros that post to the alert channel)"
+    slash("TrackedMacros", "Toggle tracked macros (macros that post to the alert channel)") {
         execute(BooleanArg("Enabled", "enable", "disable")) {
             val enabled = args.first
             val config = configuration[guild.id.value] ?: return@execute

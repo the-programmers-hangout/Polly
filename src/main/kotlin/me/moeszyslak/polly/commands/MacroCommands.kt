@@ -2,124 +2,135 @@ package me.moeszyslak.polly.commands
 
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Permissions
+import dev.kord.core.behavior.interaction.response.respond
 import dev.kord.core.entity.channel.GuildMessageChannel
+import dev.kord.core.entity.channel.TextChannel
+import dev.kord.core.entity.interaction.GuildAutoCompleteInteraction
 import me.jakejmattson.discordkt.arguments.*
 import me.jakejmattson.discordkt.commands.commands
+import me.jakejmattson.discordkt.commands.subcommand
 import me.moeszyslak.polly.services.MacroService
 
-fun macroCommands(macroService: MacroService) = commands("Macros") {
-    text("AddMacro") {
-        description = "Adds a macro (for all channels)"
-        execute(AnyArg("Name"),
+fun macroSubcommands(macroService: MacroService) = subcommand("Macros") {
+    sub("Add", "Adds a macro (for all channels)") {
+        execute(
+            AnyArg("Name"),
             AnyArg("Category"),
-            EveryArg("Contents")) {
+            EveryArg("Contents")
+        ) {
             val (name, category, contents) = args
-
             respond(macroService.addMacro(guild.id.value, name, category, null, contents))
         }
     }
 
-    text("AddChannelMacro") {
-        description = "Adds a macro to a specific channel"
-        execute(AnyArg("Name"),
+    sub("AddChannelMacro", "Adds a macro to a specific channel") {
+        execute(
+            AnyArg("Name"),
             AnyArg("Category"),
             ChannelArg<GuildMessageChannel>("Channel"),
-            EveryArg("Contents")) {
+            EveryArg("Contents")
+        ) {
             val (name, category, channel, contents) = args
-
             respond(macroService.addMacro(guild.id.value, name, category, channel, contents))
         }
     }
 
-    text("AddTrackedMacro") {
-        description = "Adds a tracked macro (for all channels)"
-        execute(AnyArg("Name"),
+    sub("AddTrackedMacro", "Adds a tracked macro (for all channels)") {
+        execute(
+            AnyArg("Name"),
             AnyArg("Category"),
-            EveryArg("Contents")) {
+            EveryArg("Contents")
+        ) {
             val (name, category, contents) = args
-
             respond(macroService.addMacro(guild.id.value, name, category, null, contents, true))
         }
     }
 
-    text("Track") {
-        description = "Converts an existing macro to a tracked (alert) macro"
+    sub("Track", "Converts an existing macro to a tracked (alert) macro") {
         execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
             respond(macroService.toggleTrackingForExistingMacro(guild, args.first, args.second, true))
         }
     }
 
-    text("Untrack") {
-        description = "Removes tracking from an existing macro"
+    sub("Untrack", "Removes tracking from an existing macro") {
         execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
             respond(macroService.toggleTrackingForExistingMacro(guild, args.first, args.second, false))
         }
     }
 
-    text("RemoveMacro") {
-        description = "Removes a macro"
+    sub("Remove", "Removes a macro") {
         execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
             respond(macroService.removeMacro(guild.id.value, args.first, args.second))
         }
     }
 
-    text("EditMacro") {
-        description = "Edits the contents of a macro"
-        execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable(), EveryArg("Contents")) {
-            respond(macroService.editMacro(guild.id.value, args.first, args.second, args.third))
+    sub("Edit", "Edits the contents of a macro") {
+        execute(AnyArg("Name"), EveryArg("Contents"),  ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
+            respond(macroService.editMacro(guild.id.value, args.first, args.third, args.second))
         }
     }
 
-    text("EditCategory") {
-        description = "Edits the category of a macro"
-        execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable(), AnyArg("New Category")) {
-            respond(macroService.editMacroCategory(guild.id.value, args.first, args.second, args.third))
+    sub("EditCategory", "Edits the category of a macro") {
+        execute(AnyArg("Name"),  AnyArg("Category"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
+            respond(macroService.editMacroCategory(guild.id.value, args.first, args.third, args.second))
         }
     }
 
-    text("AddAlias") {
-        description = "Add an alias to a macro"
-        execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable(), AnyArg("Alias")) {
-            respond(macroService.addMacroAlias(guild.id.value, args.first, args.second, args.third))
+    sub("AddAlias", "Add an alias to a macro") {
+        execute(AnyArg("Name"), AnyArg("Alias"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
+            respond(macroService.addMacroAlias(guild.id.value, args.first, args.third, args.second))
         }
     }
 
-    text("RemoveAlias") {
-        description = "Remove an alias from a macro"
-        execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable(), AnyArg("Alias")) {
-            respond(macroService.removeMacroAlias(guild.id.value, args.first, args.second, args.third))
+    sub("RemoveAlias", "Remove an alias from a macro") {
+        execute(AnyArg("Name"), AnyArg("Alias"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
+            respond(macroService.removeMacroAlias(guild.id.value, args.first, args.third, args.second))
         }
     }
+}
 
-    text("MacroInfo") {
-        description = "Get Information for a macro"
-        requiredPermissions = Permissions(Permission.UseApplicationCommands)
+fun macroCommands(macroService: MacroService) = commands("Macros") {
+    slash("MacroInfo", "Get Information for a macro", Permissions(Permission.UseApplicationCommands)) {
         execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
             macroService.macroInfo(this, guild.id.value, args.first, args.second)
         }
     }
 
 
-    text("ListMacros") {
-        description = "Lists all macros available in the given channel. If no channel is specified, defaults to the current channel."
-        requiredPermissions = Permissions(Permission.UseApplicationCommands)
-        execute(ChannelArg<GuildMessageChannel>("Channel").optional { it.channel as GuildMessageChannel }) {
-            macroService.listMacros(this, guild.id.value, args.first)
+    slash(
+        "ListMacros",
+        "Lists all macros available in the given channel.",
+        Permissions(Permission.UseApplicationCommands)
+    ) {
+        execute(ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
+            var channelName = args.first
+            if (channelName == null) {
+                channelName = channel as GuildMessageChannel
+            }
+            val interactionResponse = interaction?.deferPublicResponse() ?: return@execute
+            macroService.listMacros(this, guild.id.value, channelName)
+            interactionResponse.respond { content = "Available Macros:" }
         }
     }
 
-    text("ListAllMacros") {
-        description = "Lists all macros available in the guild, grouped by channel."
-        requiredPermissions = Permissions(Permission.UseApplicationCommands)
+    slash(
+        "ListAllMacros",
+        "Lists all macros available in the guild, grouped by channel.",
+        Permissions(Permission.UseApplicationCommands)
+    ) {
         execute {
+            val interactionResponse = interaction?.deferPublicResponse() ?: return@execute
             macroService.listAllMacros(this, guild)
+            interactionResponse.respond { content = "Available Macros:" }
         }
     }
 
-    text("MacroStats") {
-        description = "Get statistics on most and least used macros"
-        requiredPermissions = Permissions(Permission.UseApplicationCommands)
-        execute(ChoiceArg("asc/desc", "asc", "desc").optional("desc")) {
+    slash(
+        "MacroStats",
+        "Get statistics on most and least used macros",
+        Permissions(Permission.UseApplicationCommands)
+    ) {
+        execute(ChoiceArg("option", "asc", "desc").optional("desc")) {
             when (args.first.lowercase()) {
                 "asc" -> macroService.macroStats(this, guild, true)
                 "desc" -> macroService.macroStats(this, guild, false)
@@ -127,12 +138,29 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    text("SearchMacros") {
-        description = "Search the available macros available"
-        requiredPermissions = Permissions(Permission.UseApplicationCommands)
+    slash("SearchMacros", "Search the available macros available", Permissions(Permission.UseApplicationCommands)) {
         execute(EveryArg) {
             val (query) = args
-            macroService.searchMacro(this, query, channel, guild.id.value)
+            macroService.searchMacro(this, query, channel as GuildMessageChannel, guild.id.value)
+        }
+    }
+
+    fun autocompleteMacroArg() = AnyArg("Macro", "Macro name to send").autocomplete {
+        val guild = (interaction as GuildAutoCompleteInteraction).getGuild()
+        val channel = (interaction as GuildAutoCompleteInteraction).channel.asChannel()
+        macroService.getMacrosAvailableIn(guild.id.value, channel).filter { it.name.contains(input) }.map { it.name }
+    }
+
+    slash("macro", "Search and send a macro", Permissions(Permission.UseApplicationCommands)) {
+        execute(
+            autocompleteMacroArg(),
+            MemberArg("Target", "Optional user to tag in macro response").optionalNullable(null)
+        ) {
+            val (name, target) = args
+            val macro = macroService.findMacro(guild.id.value, name, channel) ?: return@execute
+            if (target != null) {
+                respondPublic("${target.mention} ${macro.contents}")
+            } else respondPublic(macro.contents)
         }
     }
 }
