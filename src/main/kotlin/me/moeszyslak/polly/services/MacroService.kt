@@ -32,7 +32,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
     private val allCommands
         get() = discord.commands.map { it.names }.flatten().map { it.lowercase() }
 
-    suspend fun macroInfo(event: GuildSlashCommandEvent<Args2<String, GuildMessageChannel?>>, guild: GuildId, name_raw: String, channel: GuildMessageChannel?) {
+    suspend fun macroInfo(event: GuildSlashCommandEvent<Args2<String, GuildMessageChannel?>>, guild: Snowflake, name_raw: String, channel: GuildMessageChannel?) {
         val channelId = channel?.id?.toString() ?: ""
         val name = name_raw.lowercase()
 
@@ -74,7 +74,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
         }
     }
 
-    fun addMacro(guild: GuildId, nameRaw: String, categoryRaw: String, channel: GuildMessageChannel?, contents: String, tracked: Boolean = false): String {
+    fun addMacro(guild: Snowflake, nameRaw: String, categoryRaw: String, channel: GuildMessageChannel?, contents: String, tracked: Boolean = false): String {
         val channelId = channel?.id?.toString() ?: ""
         val name = nameRaw.lowercase()
         val category = categoryRaw.lowercase()
@@ -95,7 +95,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
         }
     }
 
-    fun removeMacro(guild: GuildId, name_raw: String, channel: GuildMessageChannel?): String {
+    fun removeMacro(guild: Snowflake, name_raw: String, channel: GuildMessageChannel?): String {
         val channelId = channel?.id?.value ?: ""
         val name = name_raw.lowercase()
 
@@ -110,7 +110,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
         }
     }
 
-    fun editMacro(guild: GuildId, name_raw: String, channel: GuildMessageChannel?, contents: String): String {
+    fun editMacro(guild: Snowflake, name_raw: String, channel: GuildMessageChannel?, contents: String): String {
         val channelId = channel?.id?.value ?: ""
         val name = name_raw.lowercase()
 
@@ -134,7 +134,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
         val channelId = channel?.id?.value ?: ""
         val name = name_raw.lowercase()
 
-        val macro = store.forGuild(guild.id.value) { macros ->
+        val macro = store.forGuild(guild.id) { macros ->
             macros["$name#$channelId"]?.let {
                 it.tracked = tracking
                 return@forGuild it
@@ -144,16 +144,16 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
 
         return if (macro != null && tracking) {
             val names = macro.displayNames()
-            "Success. Macro `$names` will now post an alert to ${guild.getChannel(Snowflake(configuration[guild.id.value]!!.alertChannel)).mention}"
+            "Success. Macro `$names` will now post an alert to ${guild.getChannel(configuration[guild.id]!!.alertChannel).mention}"
         } else if (macro != null && !tracking) {
             val names = macro.displayNames()
-            "Success. Macro `$names` will no longer post an alert to ${guild.getChannel(Snowflake(configuration[guild.id.value]!!.alertChannel)).mention}"
+            "Success. Macro `$names` will no longer post an alert to ${guild.getChannel(configuration[guild.id]!!.alertChannel).mention}"
         } else {
             "Cannot find a macro by that name. If it is a channel specific macro you need to provide the channel as well."
         }
     }
 
-    fun editMacroCategory(guild: GuildId, name_raw: String, channel: GuildMessageChannel?, category_raw: String): String {
+    fun editMacroCategory(guild: Snowflake, name_raw: String, channel: GuildMessageChannel?, category_raw: String): String {
         val channelId = channel?.id?.value ?: ""
         val name = name_raw.lowercase()
         val category = category_raw.lowercase()
@@ -176,7 +176,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
         }
     }
 
-    fun addMacroAlias(guild: GuildId, name_raw: String, channel: GuildMessageChannel?, alias_raw: String): String {
+    fun addMacroAlias(guild: Snowflake, name_raw: String, channel: GuildMessageChannel?, alias_raw: String): String {
         val channelId = channel?.id?.toString() ?: ""
         val name = name_raw.lowercase()
         val alias = alias_raw.lowercase()
@@ -201,7 +201,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
         }
     }
 
-    fun removeMacroAlias(guild: GuildId, name_raw: String, channel: GuildMessageChannel?, alias_raw: String): String {
+    fun removeMacroAlias(guild: Snowflake, name_raw: String, channel: GuildMessageChannel?, alias_raw: String): String {
         val channelId = channel?.id?.value ?: ""
         val name = name_raw.lowercase()
         val alias = alias_raw.lowercase()
@@ -223,7 +223,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
         }
     }
 
-    suspend fun listMacros(event: CommandEvent<*>, guild: GuildId, channel: GuildMessageChannel) = with(event) {
+    suspend fun listMacros(event: CommandEvent<*>, guild: Snowflake, channel: GuildMessageChannel) = with(event) {
         val availableMacros = getMacrosAvailableIn(guild, channel)
             .groupBy { it.category }
             .toList()
@@ -253,7 +253,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
     }
 
     suspend fun listAllMacros(event: CommandEvent<*>, guild: Guild) {
-        val allMacros = store.forGuild(guild.id.value) { it }
+        val allMacros = store.forGuild(guild.id) { it }
             .map { it.value }
             .groupBy {
                 it.channel?.toSnowflakeOrNull()?.let { guild.getChannel(it).name } ?: "Global Macros"
@@ -286,7 +286,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
     }
 
     suspend fun macroStats(event: CommandEvent<*>, guild: Guild, asc: Boolean) {
-        val allMacros = store.forGuild(guild.id.value) { it }
+        val allMacros = store.forGuild(guild.id) { it }
             .map { it.value }
             .groupBy {
                 it.channel?.toSnowflakeOrNull()?.let { guild.getChannel(it).name } ?: "Global Macros"
@@ -323,7 +323,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
 
     }
 
-    suspend fun searchMacro(event: CommandEvent<*>, query: String, channel: GuildMessageChannel, guild: GuildId) {
+    suspend fun searchMacro(event: CommandEvent<*>, query: String, channel: GuildMessageChannel, guild: Snowflake) {
         val macros = getMacrosAvailableIn(guild, channel)
         val aliases = macros.flatMap { m -> m.aliases.toMutableList().also { it.add(m.name) } }
         val topNames = FuzzySearch.extractSorted(query, aliases, 70).take(5)
@@ -360,7 +360,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
         }
     }
 
-    fun getMacrosAvailableIn(guild: GuildId, channel: GuildMessageChannel): List<Macro> {
+    fun getMacrosAvailableIn(guild: Snowflake, channel: GuildMessageChannel): List<Macro> {
         val macroList = store.forGuild(guild) { macros ->
             macros.filterValues { it.canRun(channel) }
         }
@@ -371,7 +371,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
         }.map { it.value }
     }
 
-    fun findMacro(guild: GuildId, name_raw: String, channel: MessageChannelBehavior): Macro? {
+    fun findMacro(guild: Snowflake, name_raw: String, channel: MessageChannelBehavior): Macro? {
         val name = name_raw.lowercase()
         val channelId = channel.id.toString()
         val macro = store.findAlias(guild, name, channelId) { it }
@@ -388,7 +388,7 @@ val macroCooldown = mutableListOf<Pair<Snowflake, Macro>>()
 fun macroListener(macroService: MacroService, configuration: Configuration) = listeners {
     on<MessageCreateEvent> {
         val guild = getGuild() ?: return@on
-        val guildId = guild.id.value
+        val guildId = guild.id
         val member = member ?: return@on
         if (member.isIgnored(configuration)) {
             return@on
@@ -432,14 +432,14 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
 
         val logChannelId = configuration[guildId]?.logChannel ?: return@on
 
-        guild.getChannelOf<GuildMessageChannel>(Snowflake(logChannelId))
+        guild.getChannelOf<GuildMessageChannel>(logChannelId)
             .createMessage("${member.username} :: ${member.id.value} " +
                 "invoked $macroName in ${message.channel.mention}")
 
         if (guildConfiguration.trackedMacrosEnabled && macro.tracked) {
             val alertChannelId = configuration[guildId]?.alertChannel ?: return@on
 
-            guild.getChannelOf<GuildMessageChannel>(Snowflake(alertChannelId))
+            guild.getChannelOf<GuildMessageChannel>(alertChannelId)
                 .createEmbed {
                     title = "Tracked Macro Invoked"
                     color = discord.configuration.theme

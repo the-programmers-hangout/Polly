@@ -19,7 +19,7 @@ fun macroSubcommands(macroService: MacroService) = subcommand("Macros") {
             EveryArg("Contents")
         ) {
             val (name, category, contents) = args
-            respond(macroService.addMacro(guild.id.value, name, category, null, contents))
+            respond(macroService.addMacro(guild.id, name, category, null, contents))
         }
     }
 
@@ -31,7 +31,7 @@ fun macroSubcommands(macroService: MacroService) = subcommand("Macros") {
             EveryArg("Contents")
         ) {
             val (name, category, channel, contents) = args
-            respond(macroService.addMacro(guild.id.value, name, category, channel, contents))
+            respond(macroService.addMacro(guild.id, name, category, channel, contents))
         }
     }
 
@@ -42,7 +42,7 @@ fun macroSubcommands(macroService: MacroService) = subcommand("Macros") {
             EveryArg("Contents")
         ) {
             val (name, category, contents) = args
-            respond(macroService.addMacro(guild.id.value, name, category, null, contents, true))
+            respond(macroService.addMacro(guild.id, name, category, null, contents, true))
         }
     }
 
@@ -60,31 +60,31 @@ fun macroSubcommands(macroService: MacroService) = subcommand("Macros") {
 
     sub("Remove", "Removes a macro") {
         execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
-            respond(macroService.removeMacro(guild.id.value, args.first, args.second))
+            respond(macroService.removeMacro(guild.id, args.first, args.second))
         }
     }
 
     sub("Edit", "Edits the contents of a macro") {
         execute(AnyArg("Name"), EveryArg("Contents"),  ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
-            respond(macroService.editMacro(guild.id.value, args.first, args.third, args.second))
+            respond(macroService.editMacro(guild.id, args.first, args.third, args.second))
         }
     }
 
     sub("EditCategory", "Edits the category of a macro") {
         execute(AnyArg("Name"),  AnyArg("Category"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
-            respond(macroService.editMacroCategory(guild.id.value, args.first, args.third, args.second))
+            respond(macroService.editMacroCategory(guild.id, args.first, args.third, args.second))
         }
     }
 
     sub("AddAlias", "Add an alias to a macro") {
         execute(AnyArg("Name"), AnyArg("Alias"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
-            respond(macroService.addMacroAlias(guild.id.value, args.first, args.third, args.second))
+            respond(macroService.addMacroAlias(guild.id, args.first, args.third, args.second))
         }
     }
 
     sub("RemoveAlias", "Remove an alias from a macro") {
         execute(AnyArg("Name"), AnyArg("Alias"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
-            respond(macroService.removeMacroAlias(guild.id.value, args.first, args.third, args.second))
+            respond(macroService.removeMacroAlias(guild.id, args.first, args.third, args.second))
         }
     }
 }
@@ -92,7 +92,7 @@ fun macroSubcommands(macroService: MacroService) = subcommand("Macros") {
 fun macroCommands(macroService: MacroService) = commands("Macros") {
     slash("MacroInfo", "Get Information for a macro", Permissions(Permission.UseApplicationCommands)) {
         execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
-            macroService.macroInfo(this, guild.id.value, args.first, args.second)
+            macroService.macroInfo(this, guild.id, args.first, args.second)
         }
     }
 
@@ -108,7 +108,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
                 channelName = channel as GuildMessageChannel
             }
             val interactionResponse = interaction?.deferPublicResponse() ?: return@execute
-            macroService.listMacros(this, guild.id.value, channelName)
+            macroService.listMacros(this, guild.id, channelName)
             interactionResponse.respond { content = "Available Macros:" }
         }
     }
@@ -141,14 +141,14 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
     slash("SearchMacros", "Search the available macros available", Permissions(Permission.UseApplicationCommands)) {
         execute(EveryArg) {
             val (query) = args
-            macroService.searchMacro(this, query, channel as GuildMessageChannel, guild.id.value)
+            macroService.searchMacro(this, query, channel as GuildMessageChannel, guild.id)
         }
     }
 
     fun autocompleteMacroArg() = AnyArg("Macro", "Macro name to send").autocomplete {
         val guild = (interaction as GuildAutoCompleteInteraction).getGuild()
         val channel = (interaction as GuildAutoCompleteInteraction).channel.asChannel()
-        macroService.getMacrosAvailableIn(guild.id.value, channel).filter { it.name.contains(input) }.map { it.name }
+        macroService.getMacrosAvailableIn(guild.id, channel).filter { it.name.contains(input) }.map { it.name }
     }
 
     slash("macro", "Search and send a macro", Permissions(Permission.UseApplicationCommands)) {
@@ -157,7 +157,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
             MemberArg("Target", "Optional user to tag in macro response").optionalNullable(null)
         ) {
             val (name, target) = args
-            val macro = macroService.findMacro(guild.id.value, name, channel) ?: return@execute
+            val macro = macroService.findMacro(guild.id, name, channel) ?: return@execute
             if (target != null) {
                 respondPublic("${target.mention} ${macro.contents}")
             } else respondPublic(macro.contents)

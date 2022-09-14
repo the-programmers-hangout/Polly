@@ -22,7 +22,7 @@ fun main() {
         data("config/macros.json") { MacroStore() }
 
         prefix {
-            guild?.let { configuration[it.id.value]?.prefix } ?: prefix
+            guild?.let { configuration[it.id]?.prefix } ?: prefix
         }
 
         configure {

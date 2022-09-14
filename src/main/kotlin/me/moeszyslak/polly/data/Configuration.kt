@@ -1,30 +1,27 @@
 package me.moeszyslak.polly.data
 
-import dev.kord.core.entity.Role
+import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.channel.Channel
 import kotlinx.serialization.Serializable
 import me.jakejmattson.discordkt.dsl.Data
 import me.jakejmattson.discordkt.dsl.edit
 
-typealias GuildId = ULong
-
 @Serializable
 data class Configuration(
     val botOwner: Long = 345541952500006912,
-    val guildConfigurations: MutableMap<GuildId, GuildConfiguration> = mutableMapOf()) : Data() {
+    val guildConfigurations: MutableMap<Snowflake, GuildConfiguration> = mutableMapOf()) : Data() {
 
-    operator fun get(id: GuildId) = guildConfigurations[id]
-    fun hasGuildConfig(guildId: GuildId) = guildConfigurations.containsKey(guildId)
+    operator fun get(id: Snowflake) = guildConfigurations[id]
+    fun hasGuildConfig(guildId: Snowflake) = guildConfigurations.containsKey(guildId)
 
-    fun setup(guildId: GuildId, logChannel: Channel, alertChannel: Channel, cooldown: Double, trackedMacrosEnabled: Boolean) {
+    fun setup(guildId: Snowflake, logChannel: Channel, alertChannel: Channel, cooldown: Double, trackedMacrosEnabled: Boolean) {
         if (guildConfigurations[guildId] != null) return
 
         val newConfiguration = GuildConfiguration(
-            logChannel.id.value,
-            alertChannel.id.value,
+            logChannel.id,
+            alertChannel.id,
             trackedMacrosEnabled,
-            cooldown,
-            mutableSetOf()
+            cooldown
         )
 
         edit { guildConfigurations[guildId] = newConfiguration }
@@ -33,10 +30,10 @@ data class Configuration(
 
 @Serializable
 data class GuildConfiguration(
-    var logChannel: ULong,
-    var alertChannel: ULong,
+    var logChannel: Snowflake,
+    var alertChannel: Snowflake,
     var trackedMacrosEnabled: Boolean,
     var channelCooldown: Double,
-    var ignoredUsers: MutableSet<ULong>,
+    var ignoredUsers: MutableSet<Snowflake> = mutableSetOf(),
     var prefix: String = "++"
-    )
+)

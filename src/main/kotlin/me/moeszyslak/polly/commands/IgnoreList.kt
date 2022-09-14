@@ -11,16 +11,16 @@ import me.moeszyslak.polly.data.Configuration
 import java.awt.Color
 
 fun Member.isIgnored(configuration: Configuration): Boolean {
-    val config = configuration[guildId.value] ?: return false
+    val config = configuration[guildId] ?: return false
 
-    return config.ignoredUsers.contains(id.value)
+    return config.ignoredUsers.contains(id)
 }
 
 fun ignoreListCommands(configuration: Configuration) = commands("IgnoreList") {
     slash("IgnoreList", "Show ignore list.") {
         execute {
-            val config = configuration[guild.id.value] ?: return@execute
-            val users = config.ignoredUsers.map { discord.kord.getUser(Snowflake(it))!!.mention }
+            val config = configuration[guild.id] ?: return@execute
+            val users = config.ignoredUsers.map { discord.kord.getUser(it)!!.mention }
 
             respond {
                 title = "Ignored users"
@@ -45,26 +45,26 @@ fun ignoreListCommands(configuration: Configuration) = commands("IgnoreList") {
             UserArg) {
 
             val (choice, user) = args
-            val config = configuration[guild.id.value] ?: return@execute
+            val config = configuration[guild.id] ?: return@execute
 
             when (choice) {
                 "add" -> {
-                    if (config.ignoredUsers.contains(user.id.value)) {
+                    if (config.ignoredUsers.contains(user.id)) {
                         respond("${user.username} is already being ignored")
                         return@execute
                     }
 
-                    configuration.edit { config.ignoredUsers.add(user.id.value) }
+                    configuration.edit { config.ignoredUsers.add(user.id) }
                     respond("${user.username} added to the ignore list")
                 }
 
                 "remove" -> {
-                    if (!config.ignoredUsers.contains(user.id.value)) {
+                    if (!config.ignoredUsers.contains(user.id)) {
                         respond("${user.username} is not being ignored")
                         return@execute
                     }
 
-                    configuration.edit { config.ignoredUsers.remove(user.id.value) }
+                    configuration.edit { config.ignoredUsers.remove(user.id) }
                     respond("${user.username} removed from the ignore list")
                 }
 
