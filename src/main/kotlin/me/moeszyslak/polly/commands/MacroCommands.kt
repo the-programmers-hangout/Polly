@@ -89,19 +89,14 @@ fun macroSubcommands(macroService: MacroService) = subcommand("Macros") {
     }
 }
 
-fun macroCommands(macroService: MacroService) = commands("Macros") {
-    slash("MacroInfo", "Get Information for a macro", Permissions(Permission.UseApplicationCommands)) {
+fun macroCommands(macroService: MacroService) = commands("Macros", Permissions(Permission.UseApplicationCommands)) {
+    slash("MacroInfo", "Get Information for a macro") {
         execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
             macroService.macroInfo(this, guild.id, args.first, args.second)
         }
     }
 
-
-    slash(
-        "ListMacros",
-        "Lists all macros available in the given channel.",
-        Permissions(Permission.UseApplicationCommands)
-    ) {
+    slash("ListMacros", "Lists all macros available in the given channel.", ) {
         execute(ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
             var channelName = args.first
             if (channelName == null) {
@@ -113,11 +108,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    slash(
-        "ListAllMacros",
-        "Lists all macros available in the guild, grouped by channel.",
-        Permissions(Permission.UseApplicationCommands)
-    ) {
+    slash("ListAllMacros", "Lists all macros available in the guild, grouped by channel.") {
         execute {
             val interactionResponse = interaction?.deferPublicResponse() ?: return@execute
             macroService.listAllMacros(this, guild)
@@ -125,11 +116,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    slash(
-        "MacroStats",
-        "Get statistics on most and least used macros",
-        Permissions(Permission.UseApplicationCommands)
-    ) {
+    slash("MacroStats", "Get statistics on most and least used macros") {
         execute(ChoiceArg("option", "asc", "desc").optional("desc")) {
             when (args.first.lowercase()) {
                 "asc" -> macroService.macroStats(this, guild, true)
@@ -138,7 +125,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         }
     }
 
-    slash("SearchMacros", "Search the available macros available", Permissions(Permission.UseApplicationCommands)) {
+    slash("SearchMacros", "Search the available macros available") {
         execute(EveryArg) {
             val (query) = args
             macroService.searchMacro(this, query, channel as GuildMessageChannel, guild.id)
@@ -151,7 +138,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros") {
         macroService.getMacrosAvailableIn(guild.id, channel).filter { it.name.contains(input) }.map { it.name }
     }
 
-    slash("macro", "Search and send a macro", Permissions(Permission.UseApplicationCommands)) {
+    slash("macro", "Search and send a macro") {
         execute(
             autocompleteMacroArg(),
             MemberArg("Target", "Optional user to tag in macro response").optionalNullable(null)
