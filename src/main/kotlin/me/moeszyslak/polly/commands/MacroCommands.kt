@@ -11,6 +11,12 @@ import me.jakejmattson.discordkt.commands.commands
 import me.jakejmattson.discordkt.commands.subcommand
 import me.moeszyslak.polly.services.MacroService
 
+fun autocompleteMacroArg(macroService: MacroService) = AnyArg("Macro", "The name of an existing macro").autocomplete {
+    val guild = (interaction as GuildAutoCompleteInteraction).getGuild()
+    val channel = (interaction as GuildAutoCompleteInteraction).channel.asChannel()
+    macroService.getMacrosAvailableIn(guild.id, channel).filter { it.name.contains(input) }.map { it.name }
+}
+
 fun macroSubcommands(macroService: MacroService) = subcommand("Macros") {
     sub("Add", "Adds a macro (for all channels)") {
         execute(
@@ -47,43 +53,43 @@ fun macroSubcommands(macroService: MacroService) = subcommand("Macros") {
     }
 
     sub("Track", "Converts an existing macro to a tracked (alert) macro") {
-        execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
+        execute(autocompleteMacroArg(macroService), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
             respond(macroService.toggleTrackingForExistingMacro(guild, args.first, args.second, true))
         }
     }
 
     sub("Untrack", "Removes tracking from an existing macro") {
-        execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
+        execute(autocompleteMacroArg(macroService), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
             respond(macroService.toggleTrackingForExistingMacro(guild, args.first, args.second, false))
         }
     }
 
     sub("Remove", "Removes a macro") {
-        execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
+        execute(autocompleteMacroArg(macroService), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
             respond(macroService.removeMacro(guild.id, args.first, args.second))
         }
     }
 
     sub("Edit", "Edits the contents of a macro") {
-        execute(AnyArg("Name"), EveryArg("Contents"),  ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
+        execute(autocompleteMacroArg(macroService), EveryArg("Contents"),  ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
             respond(macroService.editMacro(guild.id, args.first, args.third, args.second))
         }
     }
 
     sub("EditCategory", "Edits the category of a macro") {
-        execute(AnyArg("Name"),  AnyArg("Category"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
+        execute(autocompleteMacroArg(macroService),  AnyArg("Category"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
             respond(macroService.editMacroCategory(guild.id, args.first, args.third, args.second))
         }
     }
 
     sub("AddAlias", "Add an alias to a macro") {
-        execute(AnyArg("Name"), AnyArg("Alias"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
+        execute(autocompleteMacroArg(macroService), AnyArg("Alias"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
             respond(macroService.addMacroAlias(guild.id, args.first, args.third, args.second))
         }
     }
 
     sub("RemoveAlias", "Remove an alias from a macro") {
-        execute(AnyArg("Name"), AnyArg("Alias"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
+        execute(autocompleteMacroArg(macroService), AnyArg("Alias"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
             respond(macroService.removeMacroAlias(guild.id, args.first, args.third, args.second))
         }
     }
@@ -91,7 +97,7 @@ fun macroSubcommands(macroService: MacroService) = subcommand("Macros") {
 
 fun macroCommands(macroService: MacroService) = commands("Macros", Permissions(Permission.UseApplicationCommands)) {
     slash("MacroInfo", "Get Information for a macro") {
-        execute(AnyArg("Name"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
+        execute(autocompleteMacroArg(macroService), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
             macroService.macroInfo(this, guild.id, args.first, args.second)
         }
     }
@@ -132,15 +138,9 @@ fun macroCommands(macroService: MacroService) = commands("Macros", Permissions(P
         }
     }
 
-    fun autocompleteMacroArg() = AnyArg("Macro", "Macro name to send").autocomplete {
-        val guild = (interaction as GuildAutoCompleteInteraction).getGuild()
-        val channel = (interaction as GuildAutoCompleteInteraction).channel.asChannel()
-        macroService.getMacrosAvailableIn(guild.id, channel).filter { it.name.contains(input) }.map { it.name }
-    }
-
     slash("macro", "Search and send a macro") {
         execute(
-            autocompleteMacroArg(),
+            autocompleteMacroArg(macroService),
             MemberArg("Target", "Optional user to tag in macro response").optionalNullable(null)
         ) {
             val (name, target) = args

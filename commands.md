@@ -10,15 +10,15 @@
 | Commands        | Arguments                         | Description                                           |
 |-----------------|-----------------------------------|-------------------------------------------------------|
 | Add             | Name, Category, Contents          | Adds a macro (for all channels)                       |
-| AddAlias        | Name, Alias, [Channel]            | Add an alias to a macro                               |
+| AddAlias        | Macro, Alias, [Channel]           | Add an alias to a macro                               |
 | AddChannelMacro | Name, Category, Channel, Contents | Adds a macro to a specific channel                    |
 | AddTrackedMacro | Name, Category, Contents          | Adds a tracked macro (for all channels)               |
-| Edit            | Name, Contents, [Channel]         | Edits the contents of a macro                         |
-| EditCategory    | Name, Category, [Channel]         | Edits the category of a macro                         |
-| Remove          | Name, [Channel]                   | Removes a macro                                       |
-| RemoveAlias     | Name, Alias, [Channel]            | Remove an alias from a macro                          |
-| Track           | Name, [Channel]                   | Converts an existing macro to a tracked (alert) macro |
-| Untrack         | Name, [Channel]                   | Removes tracking from an existing macro               |
+| Edit            | Macro, Contents, [Channel]        | Edits the contents of a macro                         |
+| EditCategory    | Macro, Category, [Channel]        | Edits the category of a macro                         |
+| Remove          | Macro, [Channel]                  | Removes a macro                                       |
+| RemoveAlias     | Macro, Alias, [Channel]           | Remove an alias from a macro                          |
+| Track           | Macro, [Channel]                  | Converts an existing macro to a tracked (alert) macro |
+| Untrack         | Macro, [Channel]                  | Removes tracking from an existing macro               |
 
 ## Basics
 | Commands      | Arguments                                         | Description                                                   |
@@ -37,14 +37,14 @@
 | IgnoreList |              | Show ignore list.                      |
 
 ## Macros
-| Commands      | Arguments       | Description                                                  |
-|---------------|-----------------|--------------------------------------------------------------|
-| ListAllMacros |                 | Lists all macros available in the guild, grouped by channel. |
-| ListMacros    | [Channel]       | Lists all macros available in the given channel.             |
-| MacroInfo     | Name, [Channel] | Get Information for a macro                                  |
-| MacroStats    | [option]        | Get statistics on most and least used macros                 |
-| SearchMacros  | Text            | Search the available macros available                        |
-| macro         | Macro, [Target] | Search and send a macro                                      |
+| Commands      | Arguments        | Description                                                  |
+|---------------|------------------|--------------------------------------------------------------|
+| ListAllMacros |                  | Lists all macros available in the guild, grouped by channel. |
+| ListMacros    | [Channel]        | Lists all macros available in the given channel.             |
+| MacroInfo     | Macro, [Channel] | Get Information for a macro                                  |
+| MacroStats    | [option]         | Get statistics on most and least used macros                 |
+| SearchMacros  | Text             | Search the available macros available                        |
+| macro         | Macro, [Target]  | Search and send a macro                                      |
 
 ## Utility
 | Commands | Arguments | Description          |
