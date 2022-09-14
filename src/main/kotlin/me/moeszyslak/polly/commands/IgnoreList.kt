@@ -17,8 +17,7 @@ fun Member.isIgnored(configuration: Configuration): Boolean {
 }
 
 fun ignoreListCommands(configuration: Configuration) = commands("IgnoreList") {
-    text("IgnoreList") {
-        description = "Show ignore list."
+    slash("IgnoreList", "Show ignore list.") {
         execute {
             val config = configuration[guild.id.value] ?: return@execute
             val users = config.ignoredUsers.map { discord.kord.getUser(Snowflake(it))!!.mention }
@@ -40,10 +39,9 @@ fun ignoreListCommands(configuration: Configuration) = commands("IgnoreList") {
         }
     }
 
-    text("Ignore") {
-        description = "Add/remove users from the ignore list."
+    slash("Ignore", "Add/remove users from the ignore list.") {
         execute(
-            ChoiceArg("add/remove", "add", "remove"),
+            ChoiceArg("option", "add", "remove"),
             UserArg) {
 
             val (choice, user) = args
