@@ -4,7 +4,6 @@ import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Permissions
 import dev.kord.core.behavior.interaction.response.respond
 import dev.kord.core.entity.channel.GuildMessageChannel
-import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.interaction.GuildAutoCompleteInteraction
 import me.jakejmattson.discordkt.arguments.*
 import me.jakejmattson.discordkt.commands.commands
@@ -71,13 +70,13 @@ fun macroSubcommands(macroService: MacroService) = subcommand("Macros") {
     }
 
     sub("Edit", "Edits the contents of a macro") {
-        execute(autocompleteMacroArg(macroService), EveryArg("Contents"),  ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
+        execute(autocompleteMacroArg(macroService), EveryArg("Contents"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
             respond(macroService.editMacro(guild.id, args.first, args.third, args.second))
         }
     }
 
     sub("EditCategory", "Edits the category of a macro") {
-        execute(autocompleteMacroArg(macroService),  AnyArg("Category"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
+        execute(autocompleteMacroArg(macroService), AnyArg("Category"), ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
             respond(macroService.editMacroCategory(guild.id, args.first, args.third, args.second))
         }
     }
@@ -102,7 +101,7 @@ fun macroCommands(macroService: MacroService) = commands("Macros", Permissions(P
         }
     }
 
-    slash("ListMacros", "Lists all macros available in the given channel.", ) {
+    slash("ListMacros", "Lists all macros available in the given channel.") {
         execute(ChannelArg<GuildMessageChannel>("Channel").optionalNullable()) {
             var channelName = args.first
             if (channelName == null) {

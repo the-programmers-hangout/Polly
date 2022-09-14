@@ -7,9 +7,7 @@ import me.jakejmattson.discordkt.dsl.Data
 import me.jakejmattson.discordkt.dsl.edit
 
 @Serializable
-data class Configuration(
-    val botOwner: Long = 345541952500006912,
-    val guildConfigurations: MutableMap<Snowflake, GuildConfiguration> = mutableMapOf()) : Data() {
+data class Configuration(val guildConfigurations: MutableMap<Snowflake, GuildConfiguration> = mutableMapOf()) : Data() {
 
     operator fun get(id: Snowflake) = guildConfigurations[id]
     fun hasGuildConfig(guildId: Snowflake) = guildConfigurations.containsKey(guildId)
@@ -17,14 +15,7 @@ data class Configuration(
     fun setup(guildId: Snowflake, logChannel: Channel, alertChannel: Channel, cooldown: Double, trackedMacrosEnabled: Boolean) {
         if (guildConfigurations[guildId] != null) return
 
-        val newConfiguration = GuildConfiguration(
-            logChannel.id,
-            alertChannel.id,
-            trackedMacrosEnabled,
-            cooldown
-        )
-
-        edit { guildConfigurations[guildId] = newConfiguration }
+        edit { guildConfigurations[guildId] = GuildConfiguration(logChannel.id, alertChannel.id, trackedMacrosEnabled, cooldown) }
     }
 }
 
@@ -35,5 +26,5 @@ data class GuildConfiguration(
     var trackedMacrosEnabled: Boolean,
     var channelCooldown: Double,
     var ignoredUsers: MutableSet<Snowflake> = mutableSetOf(),
-    var prefix: String = "++"
+    var prefix: String = "+"
 )

@@ -1,6 +1,5 @@
 package me.moeszyslak.polly.commands
 
-import dev.kord.common.entity.Snowflake
 import dev.kord.common.kColor
 import dev.kord.core.entity.Member
 import me.jakejmattson.discordkt.arguments.ChoiceArg
