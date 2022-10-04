@@ -34,7 +34,6 @@ fun main() {
             theme = Color(0x00BFFF)
             recommendCommands = false
             defaultPermissions = Permissions(Permission.ManageMessages)
-            //intents = Intent.GuildMembers
         }
 
         onStart {

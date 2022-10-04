@@ -3,8 +3,8 @@ version = Versions.BOT
 description = "A simple, elegant macro bot"
 
 plugins {
-    kotlin("jvm") version "1.7.10"
-    kotlin("plugin.serialization") version "1.7.10"
+    kotlin("jvm") version "1.7.20"
+    kotlin("plugin.serialization") version "1.7.20"
     id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
