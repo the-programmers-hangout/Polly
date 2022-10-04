@@ -44,7 +44,7 @@ data class MacroStore(
         macros.forEach { (key, macro) ->
             updated["${macro.name}#${macro.channel()}"] = key
             macro.aliases.forEach {
-                updated["$it#${macro.channel}"] = key
+                updated["$it#${macro.channel?.value}"] = key
             }
         }
 
@@ -55,24 +55,19 @@ data class MacroStore(
 @Serializable
 data class Macro(
     val name: String,
-    var aliases: MutableList<String> = mutableListOf(),
+    val aliases: MutableList<String> = mutableListOf(),
     var contents: String,
-    val channel: String?,
+    val channel: Snowflake?,
     var category: String,
     var tracked: Boolean = false,
     var uses: Int = 0
 ) {
     fun channel() = channel ?: ""
 
-    fun canRun(messageChannel: GuildMessageChannel) =
-        (channel == null || channel == "" || channel == messageChannel.id.toString())
+    fun canRun(messageChannel: GuildMessageChannel) = channel == null || channel == messageChannel.id
 
     fun displayNames() =
         listOf(listOf(name), aliases)
             .flatten()
             .joinToString(" | ")
-}
-
-fun newMacro(name: String, contents: String, channel: String, category: String, tracked: Boolean = false): Macro {
-    return Macro(name, mutableListOf(), contents, channel, category, tracked)
 }
