@@ -40,7 +40,7 @@ tasks {
 }
 
 object Versions {
-    const val BOT = "1.0.0"
+    const val BOT = "2.0.0-RC1"
     const val DISCORDKT = "0.23.4"
     const val FUZZY = "1.3.1"
 }
