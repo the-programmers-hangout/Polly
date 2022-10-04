@@ -70,7 +70,7 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
         }
     }
 
-    fun addMacro(guild: Snowflake, nameRaw: String, categoryRaw: String, channel: GuildMessageChannel?, contents: String, tracked: Boolean = false): String {
+    fun addMacro(guild: Snowflake, nameRaw: String, categoryRaw: String, channel: GuildMessageChannel?, contents: String, tracked: Boolean): String {
         val channelId = channel?.id
         val name = nameRaw.lowercase()
         val category = categoryRaw.lowercase()

@@ -17,37 +17,16 @@ fun autocompleteMacroArg(macroService: MacroService) = AnyArg("Macro", "The name
 }
 
 fun macroSubcommands(macroService: MacroService) = subcommand("Macros") {
-    sub("Add", "Adds a macro (for all channels)") {
+    sub("Create", "Create a new macro") {
         execute(
             AnyArg("Name"),
             AnyArg("Category"),
-            EveryArg("Contents")
+            EveryArg("Contents"),
+            ChannelArg<GuildMessageChannel>("Channel").optionalNullable(null),
+            BooleanArg("Track").optional(false)
         ) {
-            val (name, category, contents) = args
-            respond(macroService.addMacro(guild.id, name, category, null, contents))
-        }
-    }
-
-    sub("AddChannelMacro", "Adds a macro to a specific channel") {
-        execute(
-            AnyArg("Name"),
-            AnyArg("Category"),
-            ChannelArg<GuildMessageChannel>("Channel"),
-            EveryArg("Contents")
-        ) {
-            val (name, category, channel, contents) = args
-            respond(macroService.addMacro(guild.id, name, category, channel, contents))
-        }
-    }
-
-    sub("AddTrackedMacro", "Adds a tracked macro (for all channels)") {
-        execute(
-            AnyArg("Name"),
-            AnyArg("Category"),
-            EveryArg("Contents")
-        ) {
-            val (name, category, contents) = args
-            respond(macroService.addMacro(guild.id, name, category, null, contents, true))
+            val (name, category, contents, channel, isTracked) = args
+            respond(macroService.addMacro(guild.id, name, category, channel, contents, isTracked))
         }
     }
 

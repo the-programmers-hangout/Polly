@@ -7,18 +7,16 @@
 | /Category   | This is a subcommand group.    |
 
 ## /Macros
-| Commands        | Arguments                         | Description                                           |
-|-----------------|-----------------------------------|-------------------------------------------------------|
-| Add             | Name, Category, Contents          | Adds a macro (for all channels)                       |
-| AddAlias        | Macro, Alias, [Channel]           | Add an alias to a macro                               |
-| AddChannelMacro | Name, Category, Channel, Contents | Adds a macro to a specific channel                    |
-| AddTrackedMacro | Name, Category, Contents          | Adds a tracked macro (for all channels)               |
-| Edit            | Macro, Contents, [Channel]        | Edits the contents of a macro                         |
-| EditCategory    | Macro, Category, [Channel]        | Edits the category of a macro                         |
-| Remove          | Macro, [Channel]                  | Removes a macro                                       |
-| RemoveAlias     | Macro, Alias, [Channel]           | Remove an alias from a macro                          |
-| Track           | Macro, [Channel]                  | Converts an existing macro to a tracked (alert) macro |
-| Untrack         | Macro, [Channel]                  | Removes tracking from an existing macro               |
+| Commands     | Arguments                                    | Description                                           |
+|--------------|----------------------------------------------|-------------------------------------------------------|
+| AddAlias     | Macro, Alias, [Channel]                      | Add an alias to a macro                               |
+| Create       | Name, Category, Contents, [Channel], [Track] | Create a new macro                                    |
+| Edit         | Macro, Contents, [Channel]                   | Edits the contents of a macro                         |
+| EditCategory | Macro, Category, [Channel]                   | Edits the category of a macro                         |
+| Remove       | Macro, [Channel]                             | Removes a macro                                       |
+| RemoveAlias  | Macro, Alias, [Channel]                      | Remove an alias from a macro                          |
+| Track        | Macro, [Channel]                             | Converts an existing macro to a tracked (alert) macro |
+| Untrack      | Macro, [Channel]                             | Removes tracking from an existing macro               |
 
 ## Basics
 | Commands      | Arguments                                         | Description                                                   |
