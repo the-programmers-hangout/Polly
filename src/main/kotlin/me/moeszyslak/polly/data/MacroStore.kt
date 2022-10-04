@@ -1,21 +1,24 @@
 package me.moeszyslak.polly.data
 
+import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.channel.GuildMessageChannel
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import me.jakejmattson.discordkt.dsl.Data
+import me.jakejmattson.discordkt.dsl.edit
 
 @Serializable
 data class MacroStore(
-        val macros: MutableMap<GuildId, MutableMap<String, Macro>> = mutableMapOf()) : Data() {
+    val macros: MutableMap<Snowflake, MutableMap<String, Macro>> = mutableMapOf()) : Data() {
     @Transient
-    var aliases: MutableMap<GuildId, Map<String, String>> = mutableMapOf()
+    var aliases: MutableMap<Snowflake, Map<String, String>> = mutableMapOf()
 
-    fun <R> allAliases(guildId: GuildId, fn: (Map<String, String>) -> R): R {
+    fun <R> allAliases(guildId: Snowflake, fn: (Map<String, String>) -> R): R {
         val aliases = aliases[guildId] ?: mutableMapOf()
         return fn(aliases)
     }
 
-    fun <R> findAlias(guildId: GuildId, alias: String, channel: String, fn: (Macro) -> R): R? {
+    fun <R> findAlias(guildId: Snowflake, alias: String, channel: String, fn: (Macro) -> R): R? {
         return allAliases(guildId) { aliases ->
             val macroString = aliases["$alias#$channel"] ?: return@allAliases null
             val macro = macros[guildId]?.get(macroString) ?: return@allAliases null
@@ -24,17 +27,14 @@ data class MacroStore(
         }
     }
 
-    fun <R> forGuild(guildId: GuildId, fn: (MutableMap<String, Macro>) -> R): R {
+    fun <R> forGuild(guildId: Snowflake, fn: (MutableMap<String, Macro>) -> R): R {
         val guildMacros = macros.getOrPut(guildId) { mutableMapOf() }
         return fn(guildMacros).also { save(guildId) }
     }
 
-    private fun save(guildId: GuildId) {
-        populate(guildId)
-        save()
-    }
+    private fun save(guildId: Snowflake) = edit { populate(guildId) }
 
-    fun populate(guildId: GuildId? = null) {
+    fun populate(guildId: Snowflake? = null) {
         if (guildId == null) {
             macros.forEach { (l, _) -> populate(l) }
             return
@@ -44,7 +44,7 @@ data class MacroStore(
         macros.forEach { (key, macro) ->
             updated["${macro.name}#${macro.channel()}"] = key
             macro.aliases.forEach {
-                updated["$it#${macro.channel}"] = key
+                updated["$it#${macro.channel?.value}"] = key
             }
         }
 
@@ -54,25 +54,20 @@ data class MacroStore(
 
 @Serializable
 data class Macro(
-        val name: String,
-        var aliases: MutableList<String> = mutableListOf(),
-        var contents: String,
-        val channel: String?,
-        var category: String,
-        var tracked: Boolean = false,
-        var uses: Int = 0
+    val name: String,
+    val aliases: MutableList<String> = mutableListOf(),
+    var contents: String,
+    val channel: Snowflake?,
+    var category: String,
+    var tracked: Boolean = false,
+    var uses: Int = 0
 ) {
     fun channel() = channel ?: ""
 
-    fun canRun(messageChannel: GuildMessageChannel) =
-            (channel == null || channel == "" || channel == messageChannel.id.asString)
+    fun canRun(messageChannel: GuildMessageChannel) = channel == null || channel == messageChannel.id
 
     fun displayNames() =
-            listOf(listOf(name), aliases)
-                    .flatten()
-                    .joinToString(" | ")
-}
-
-fun newMacro(name: String, contents: String, channel: String, category: String, tracked: Boolean = false): Macro {
-    return Macro(name, mutableListOf(), contents, channel, category, tracked)
+        listOf(listOf(name), aliases)
+            .flatten()
+            .joinToString(" | ")
 }
