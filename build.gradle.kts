@@ -1,5 +1,5 @@
 group = "me.moeszyslak"
-version = Versions.BOT
+version = "2.0.0-RC1"
 description = "A simple, elegant macro bot"
 
 plugins {
@@ -13,8 +13,8 @@ repositories {
 }
 
 dependencies {
-    implementation("me.jakejmattson:DiscordKt:${Versions.DISCORDKT}")
-    implementation("me.xdrop:fuzzywuzzy:${Versions.FUZZY}")
+    implementation("me.jakejmattson:DiscordKt:0.23.4")
+    implementation("me.xdrop:fuzzywuzzy:1.3.1")
 }
 
 tasks {
@@ -37,10 +37,4 @@ tasks {
             attributes("Main-Class" to "me.moeszyslak.polly.MainAppKt")
         }
     }
-}
-
-object Versions {
-    const val BOT = "2.0.0-RC1"
-    const val DISCORDKT = "0.23.4"
-    const val FUZZY = "1.3.1"
 }
