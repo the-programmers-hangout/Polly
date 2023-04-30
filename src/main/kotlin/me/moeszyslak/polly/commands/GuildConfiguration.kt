@@ -3,8 +3,8 @@ package me.moeszyslak.polly.commands
 import me.jakejmattson.discordkt.arguments.*
 import me.jakejmattson.discordkt.commands.commands
 import me.jakejmattson.discordkt.dsl.edit
+import me.jakejmattson.discordkt.extensions.toTimeString
 import me.moeszyslak.polly.data.Configuration
-import me.moeszyslak.polly.utilities.timeToString
 
 fun guildConfigurationCommands(configuration: Configuration) = commands("Basics") {
     slash("Setup") {
@@ -51,7 +51,7 @@ fun guildConfigurationCommands(configuration: Configuration) = commands("Basics"
             val config = configuration[guild.id] ?: return@execute
 
             configuration.edit { config.channelCooldown = cooldown }
-            respond("Macro cooldown set to ${timeToString(cooldown.toLong() * 1000)}")
+            respond("Macro cooldown set to `${cooldown.toLong().toTimeString()}`")
         }
     }
 
