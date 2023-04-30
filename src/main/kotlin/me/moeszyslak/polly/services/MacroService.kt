@@ -10,6 +10,7 @@ import me.jakejmattson.discordkt.annotations.Service
 import me.jakejmattson.discordkt.commands.CommandEvent
 import me.jakejmattson.discordkt.commands.GuildSlashCommandEvent
 import me.jakejmattson.discordkt.extensions.createMenu
+import me.jakejmattson.discordkt.extensions.toSnowflake
 import me.moeszyslak.polly.data.Configuration
 import me.moeszyslak.polly.data.Macro
 import me.moeszyslak.polly.data.MacroStore
@@ -56,14 +57,14 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
             field {
                 this.name = "Channel"
                 value = if (parent.channel() == "") "Global Macro"
-                else event.guild.getChannel(parent.channel!!).mention
+                else event.guild.getChannel(parent.channel.toSnowflake()!!).mention
                 inline = true
             }
         }
     }
 
     fun addMacro(guild: Snowflake, nameRaw: String, categoryRaw: String, channel: GuildMessageChannel?, contents: String, tracked: Boolean): String {
-        val channelId = channel?.id
+        val channelId = channel?.id?.toString() ?: ""
         val name = nameRaw.lowercase()
         val category = categoryRaw.lowercase()
 
@@ -243,8 +244,8 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
     suspend fun listAllMacros(event: CommandEvent<*>, guild: Guild) {
         val allMacros = store.forGuild(guild.id) { it }
             .map { it.value }
-            .groupBy {
-                it.channel?.let { guild.getChannel(it).name } ?: "Global Macros"
+            .groupBy { macro ->
+                macro.channel.let { guild.getChannel(it.toSnowflake()).name } ?: "Global Macros"
             }
             .toList()
             .sortedByDescending { it.second.size }
@@ -276,8 +277,8 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
     suspend fun macroStats(event: CommandEvent<*>, guild: Guild, asc: Boolean) {
         val allMacros = store.forGuild(guild.id) { it }
             .map { it.value }
-            .groupBy {
-                it.channel?.let { guild.getChannel(it).name } ?: "Global Macros"
+            .groupBy { macro ->
+                macro.channel.let { guild.getChannel(it.toSnowflake()).name } ?: "Global Macros"
             }
             .toList()
             .sortedByDescending { it.second.size }
