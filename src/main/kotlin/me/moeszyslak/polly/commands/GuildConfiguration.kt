@@ -3,14 +3,14 @@ package me.moeszyslak.polly.commands
 import me.jakejmattson.discordkt.arguments.*
 import me.jakejmattson.discordkt.commands.commands
 import me.jakejmattson.discordkt.dsl.edit
-import me.jakejmattson.discordkt.extensions.toTimeString
+import me.jakejmattson.discordkt.util.toTimeString
 import me.moeszyslak.polly.data.Configuration
 
 fun guildConfigurationCommands(configuration: Configuration) = commands("Basics") {
     slash("Setup") {
         execute(ChannelArg("LogChannel"), ChannelArg("AlertChannel"), TimeArg("Cooldown"), BooleanArg("TrackedMacros")) {
             val (logChannel, alertChannel, cooldown, trackedMacros) = args
-            configuration.setup(guild.id, logChannel, alertChannel, cooldown, trackedMacros)
+            configuration.setup(guild.id, logChannel, alertChannel, cooldown.toDouble(), trackedMacros)
             respondPublic("${guild.name} has been setup")
         }
     }
@@ -50,7 +50,7 @@ fun guildConfigurationCommands(configuration: Configuration) = commands("Basics"
             val cooldown = args.first
             val config = configuration[guild.id] ?: return@execute
 
-            configuration.edit { config.channelCooldown = cooldown }
+            configuration.edit { config.channelCooldown = cooldown.toDouble() }
             respond("Macro cooldown set to `${cooldown.toLong().toTimeString()}`")
         }
     }

@@ -1,9 +1,9 @@
-FROM gradle:7.1-jdk16 AS build
+FROM gradle:9.8.1-jdk17 AS build
 COPY --chown=gradle:gradle . /polly
 WORKDIR /polly
 RUN gradle shadowJar --no-daemon
 
-FROM openjdk:11.0.8-jre-slim
+FROM eclipse-temurin:17.0.20_8-jre-alpine
 RUN mkdir /config/
 COPY --from=build /polly/build/libs/Polly.jar /
 

@@ -11,18 +11,19 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.jakejmattson.discordkt.dsl.listeners
-import me.jakejmattson.discordkt.extensions.jumpLink
-import me.jakejmattson.discordkt.extensions.pfpUrl
+import me.jakejmattson.discordkt.util.jumpLink
+import me.jakejmattson.discordkt.util.pfpUrl
 import me.moeszyslak.polly.commands.isIgnored
 import me.moeszyslak.polly.data.Configuration
 import me.moeszyslak.polly.data.Macro
 import me.moeszyslak.polly.services.MacroService
+import kotlin.time.Duration.Companion.milliseconds
 
 val macroCooldown = mutableListOf<Pair<Snowflake, Macro>>()
 
 fun macroListener(macroService: MacroService, configuration: Configuration) = listeners {
     on<MessageCreateEvent> {
-        val guild = getGuild() ?: return@on
+        val guild = getGuildOrNull() ?: return@on
         val guildId = guild.id
         val member = member ?: return@on
         if (member.isIgnored(configuration)) {
@@ -53,7 +54,7 @@ fun macroListener(macroService: MacroService, configuration: Configuration) = li
 
         GlobalScope.launch {
             val cooldown = guildConfiguration.channelCooldown * 1000
-            delay(cooldown.toLong())
+            delay(cooldown.milliseconds)
             macroCooldown -= message.channelId to macro
         }
 

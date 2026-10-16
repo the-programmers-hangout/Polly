@@ -9,8 +9,8 @@ import me.jakejmattson.discordkt.Discord
 import me.jakejmattson.discordkt.annotations.Service
 import me.jakejmattson.discordkt.commands.CommandEvent
 import me.jakejmattson.discordkt.commands.GuildSlashCommandEvent
-import me.jakejmattson.discordkt.extensions.createMenu
-import me.jakejmattson.discordkt.extensions.toSnowflake
+import me.jakejmattson.discordkt.util.createMenu
+import me.jakejmattson.discordkt.util.toSnowflake
 import me.moeszyslak.polly.data.Configuration
 import me.moeszyslak.polly.data.Macro
 import me.moeszyslak.polly.data.MacroStore
@@ -154,8 +154,6 @@ class MacroService(private val store: MacroStore, private val discord: Discord, 
             }
             return@forGuild null
         }
-
-        store.save()
 
         return if (macro != null) {
             val names = macro.displayNames()
